@@ -4,22 +4,27 @@
 	"description": "A CLI tool for generating commit messages that adhere to the Evergreen ILS project's commit policy.",
 	"main": "src/main.ts",
 	"bin": {
-	  "evergit": "./src/main.ts"
+		"evergit": "dist/main.js"
 	},
 	"scripts": {
-	  "start": "node src/main.ts",
-	  "build": "tsc",
-	  "prepare": "npm run build",
-	  "test": "echo \"Error: no test specified\" && exit 1"
+		"start": "node dist/main.js",
+		"build": "tsc",
+		"format": "prettier --write .",
+		"format-check": "prettier --check .",
+		"prepare": "npm run build",
+		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"dependencies": {
-	  "commander": "^9.0.0",
-	  "simple-git": "^3.0.0"
+		"chalk": "^4.1.2",
+		"commander": "^9.4.1",
+		"inquirer": "^8.0.0",
+		"openai": "^4.68.4"
 	},
 	"devDependencies": {
-	  "typescript": "^4.0.0"
+		"@types/inquirer": "^9.0.7",
+		"prettier": "^3.3.3",
+		"typescript": "^4.6.2"
 	},
 	"author": "Ian Skelskey <ianskelskey@gmail.com>",
 	"license": "MIT"
-  }
-  
+}

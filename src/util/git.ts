@@ -119,5 +119,5 @@ export function getRemoteName(remoteUrl: string): string {
 	const remoteName = remoteUrls
 		.split('\n')
 		.find((line: string) => line.includes(remoteUrl));
-	return remoteName?.split('\t')[0];
+	return remoteName ? remoteName.split('\t')[0] : '';
 }
