@@ -1,0 +1,25 @@
+{
+	"name": "evergit",
+	"version": "0.0.1",
+	"description": "A CLI tool for generating commit messages that adhere to the Evergreen ILS project's commit policy.",
+	"main": "src/main.ts",
+	"bin": {
+	  "evergit": "./src/main.ts"
+	},
+	"scripts": {
+	  "start": "node src/main.ts",
+	  "build": "tsc",
+	  "prepare": "npm run build",
+	  "test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"dependencies": {
+	  "commander": "^9.0.0",
+	  "simple-git": "^3.0.0"
+	},
+	"devDependencies": {
+	  "typescript": "^4.0.0"
+	},
+	"author": "Ian Skelskey <ianskelskey@gmail.com>",
+	"license": "MIT"
+  }
+  
