@@ -1,7 +1,5 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import fs from 'fs';
-import path from 'path';
 
 const colors: Record<string, (message: string) => string> = {
     info: chalk.blue,
@@ -50,62 +48,10 @@ export async function selectFilesToStage(files: string[]): Promise<string[]> {
     return answer.files;
 }
 
-export async function selectCommitStandard(): Promise<{ name: string; rules: string }> {
-    const rulesDir = path.resolve(__dirname, '../rules');
-    const files = fs.readdirSync(rulesDir).filter((file) => file.endsWith('.md'));
-    const choices = files.map((file) => file);
-
-    const answer = await inquirer.prompt({
-        type: 'list',
-        name: 'standard',
-        message: 'Select commit standard:',
-        choices: choices,
-    });
-
-    const filename: string = answer.standard;
-    const selectedFilePath = path.join(rulesDir, filename);
-    const fileContents = fs.readFileSync(selectedFilePath, 'utf-8');
-    return { name: filename, rules: fileContents };
-}
-
-export async function promptForAdditionalRequirement(
-    name: string,
-    description: string,
-    datatype: string,
-): Promise<string> {
-    let answer: any;
-    if (datatype === 'number') {
-        answer = await inquirer.prompt({
-            type: 'input',
-            name: name,
-            message: description,
-        });
-    } else if (datatype === 'string') {
-        answer = await inquirer.prompt({
-            type: 'input',
-            name: name,
-            message: description,
-        });
-    } else if (datatype === 'boolean') {
-        answer = await inquirer.prompt({
-            type: 'confirm',
-            name: name,
-            message: description,
-        });
-    } else {
-        throw new Error(`Invalid datatype: ${datatype}`);
-    }
-    return answer[name];
-}
-
 export function showHelpMenu(): void {
-    print('info', 'Usage: ai-diff-commit [options]');
-    console.log('\nOptions:');
-    console.log('  -m, --model <model>  Specify OpenAI model (default: gpt-4o)');
-    console.log('                       Available models can be found at https://platform.openai.com/docs/models/');
-    console.log('  -p, --push           Automatically push changes (default: false)');
-    console.log('  -a, --add            Automatically add all changes (default: false)');
-    console.log('  -h, --help           Display help for command');
+    print('info', 'Usage: evergit [options]');
+    print('info', 'Options:');
+    print('content', '  -h, --help\t\tShow this help menu');
 }
 
 export function print(type: string, message: string): void {
