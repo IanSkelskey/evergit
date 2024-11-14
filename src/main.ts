@@ -14,7 +14,7 @@ import {
     commitWithMessage,
 } from './util/git';
 import CommitPolicy from './util/commit_policy';
-import { selectFilesToStage, confirmCommitMessage, print, showHelpMenu } from './util/prompt';
+import { selectFilesToStage, confirmCommitMessage, print, showHelpMenu, requestLaunchpadBugNumber } from './util/prompt';
 
 const program = new Command();
 
@@ -46,6 +46,7 @@ async function main(): Promise<void> {
     const userDiff = getDiffForStagedFiles();
     const userName = getName();
     const userEmail = getEmail();
+	const bugNumber = await requestLaunchpadBugNumber();
 
     // Construct user prompt with diff and user information
     const systemPrompt = CommitPolicy;
@@ -56,6 +57,8 @@ async function main(): Promise<void> {
     User Information:
     Name: ${userName}
     Email: ${userEmail}
+
+	Lanchpad Bug Number: ${bugNumber}
   `;
 
     // Generate commit message

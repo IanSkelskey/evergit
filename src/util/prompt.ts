@@ -20,6 +20,15 @@ export async function confirmCommitMessage(commitMessage: string): Promise<boole
     return answer.commit;
 }
 
+export async function requestLaunchpadBugNumber(): Promise<string> {
+    const answer = await inquirer.prompt({
+        type: 'input',
+        name: 'bugNumber',
+        message: 'Enter the Launchpad bug number:',
+    });
+    return answer.bugNumber;
+}
+
 export async function requestFeedback(): Promise<string> {
     const answer = await inquirer.prompt({
         type: 'confirm',
