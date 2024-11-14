@@ -1,5 +1,4 @@
 const CommitPolicy = `
-export default CommitPolicy;
 # Evergreen ILS Commit Message Guidelines
 
 As an AI, you are expected to generate commit messages for the Evergreen ILS project that adhere to the following structure and standards:
