@@ -57,12 +57,6 @@ export async function selectFilesToStage(files: string[]): Promise<string[]> {
     return answer.files;
 }
 
-export function showHelpMenu(): void {
-    print('info', 'Usage: evergit [options]');
-    print('info', 'Options:');
-    print('content', '  -h, --help\t\tShow this help menu');
-}
-
 export function print(type: string, message: string): void {
     if (type === 'error') {
         console.error(colors[type](message));
