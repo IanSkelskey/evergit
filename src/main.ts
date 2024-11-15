@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import commit from './cmd/commit';
-import { Credentials, RequestTokenAuthorizationEngine } from './util/launchpad';
+import { Credentials, RequestTokenAuthorizationEngine, saveCredentials, loadCredentials } from './util/launchpad';
 
 
 const program = new Command();
@@ -23,23 +23,26 @@ function main(): void {
         .command('launchpad')
         .description('Test Launchpad API integration')
         .action(async () => {
-            // Define the consumer key for your application (replace this with your actual consumer key)
+            const storedCredentials = loadCredentials();
+
+            if (storedCredentials) {
+                console.log("Using stored credentials.");
+                console.log("Access Token:", storedCredentials.accessToken);
+                console.log("Access Token Secret:", storedCredentials.accessTokenSecret);
+                return;
+            }
+
+            // If no stored credentials, go through authentication process
             const consumerKey = "evergit";
+            const credentials = new Credentials(consumerKey);
+            const authEngine = new RequestTokenAuthorizationEngine(consumerKey);
 
             try {
-                // Step 1: Initialize credentials with the consumer key
-                const credentials = new Credentials(consumerKey);
-
-                // Step 2: Set up the authorization engine with Launchpad root URL and application name
-                const authEngine = new RequestTokenAuthorizationEngine(consumerKey);
-
-                // Step 3: Begin the authorization process
                 await authEngine.authorize(credentials);
 
                 if (credentials.accessToken) {
                     console.log("Authorization successful!");
-                    console.log("Access Token:", credentials.accessToken.key);
-                    console.log("Access Token Secret:", credentials.accessToken.secret);
+                    saveCredentials(credentials.accessToken.key, credentials.accessToken.secret);
                 } else {
                     console.log("Authorization failed or was declined by the user.");
                 }

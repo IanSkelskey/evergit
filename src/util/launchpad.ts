@@ -1,12 +1,36 @@
 import axios from 'axios';
 import * as readlineSync from 'readline-sync';
 import { URLSearchParams } from 'url';
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
+import os from 'os';
+
 
 // Define constants for Launchpad OAuth endpoints
 const requestTokenPage = "+request-token";
 const accessTokenPage = "+access-token";
 const authorizeTokenPage = "+authorize-token";
 const LAUNCHPAD_ROOT = "https://launchpad.net";
+
+const CONFIG_DIR = join(os.homedir(), '.evergit');
+const CONFIG_FILE = join(CONFIG_DIR, 'auth.json');
+
+export function saveCredentials(accessToken: string, accessTokenSecret: string) {
+    if (!existsSync(CONFIG_DIR)) {
+        mkdirSync(CONFIG_DIR, { recursive: true });
+    }
+
+    const credentials = { accessToken, accessTokenSecret };
+    writeFileSync(CONFIG_FILE, JSON.stringify(credentials), { mode: 0o600 });
+}
+
+export function loadCredentials(): { accessToken: string, accessTokenSecret: string } | null {
+    if (existsSync(CONFIG_FILE)) {
+        const data = readFileSync(CONFIG_FILE, 'utf8');
+        return JSON.parse(data);
+    }
+    return null;
+}
 
 // Error class for handling HTTP errors
 class HTTPError extends Error {
