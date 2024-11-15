@@ -54,7 +54,7 @@ async function commit(model: string): Promise<void> {
 
 // Helper function to authenticate with Launchpad
 async function getLaunchPadCredentials(): Promise<{ accessToken: string; accessTokenSecret: string } | null> {
-    authenticateLaunchpad('evergit');
+    await authenticateLaunchpad('evergit');
     return loadCredentials();
 }
 
