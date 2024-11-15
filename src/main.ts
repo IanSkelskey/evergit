@@ -4,7 +4,6 @@ import { Command } from 'commander';
 import commit from './cmd/commit';
 import { authenticateLaunchpad, loadCredentials, getBugInfo, getBugMessages } from './util/launchpad';
 
-
 const program = new Command();
 
 function main(): void {
@@ -17,7 +16,6 @@ function main(): void {
         .action(async (options) => {
             await commit(options.model);
         });
-
 
     program
         .command('launchpad')

@@ -5,12 +5,11 @@ import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import os from 'os';
 
-
 // Define constants for Launchpad OAuth endpoints
-const requestTokenPage = "+request-token";
-const accessTokenPage = "+access-token";
-const authorizeTokenPage = "+authorize-token";
-const LAUNCHPAD_ROOT = "https://launchpad.net";
+const requestTokenPage = '+request-token';
+const accessTokenPage = '+access-token';
+const authorizeTokenPage = '+authorize-token';
+const LAUNCHPAD_ROOT = 'https://launchpad.net';
 
 const CONFIG_DIR = join(os.homedir(), '.evergit');
 const CONFIG_FILE = join(CONFIG_DIR, 'auth.json');
@@ -26,7 +25,7 @@ async function getBugInfo(bugId: string, accessToken: string, accessTokenSecret:
         const response = await axios.get(endpoint, { headers });
         return response.data;
     } catch (error) {
-        console.error("Error fetching bug information:", error);
+        console.error('Error fetching bug information:', error);
         throw error;
     }
 }
@@ -38,7 +37,7 @@ async function getBugMessages(bugId: string) {
         const response = await axios.get(endpoint);
         return response.data;
     } catch (error) {
-        console.error("Error fetching bug messages:", error);
+        console.error('Error fetching bug messages:', error);
         throw error;
     }
 }
@@ -52,7 +51,7 @@ function saveCredentials(accessToken: string, accessTokenSecret: string) {
     writeFileSync(CONFIG_FILE, JSON.stringify(credentials), { mode: 0o600 });
 }
 
-function loadCredentials(): { accessToken: string, accessTokenSecret: string } | null {
+function loadCredentials(): { accessToken: string; accessTokenSecret: string } | null {
     if (existsSync(CONFIG_FILE)) {
         const data = readFileSync(CONFIG_FILE, 'utf8');
         return JSON.parse(data);
@@ -64,9 +63,9 @@ async function authenticateLaunchpad(consumerKey: string) {
     const storedCredentials = loadCredentials();
 
     if (storedCredentials) {
-        console.log("Using stored credentials.");
-        console.log("Access Token:", storedCredentials.accessToken);
-        console.log("Access Token Secret:", storedCredentials.accessTokenSecret);
+        console.log('Using stored credentials.');
+        console.log('Access Token:', storedCredentials.accessToken);
+        console.log('Access Token Secret:', storedCredentials.accessTokenSecret);
         return;
     }
 
@@ -77,13 +76,13 @@ async function authenticateLaunchpad(consumerKey: string) {
         await authEngine.authorize(credentials);
 
         if (credentials.accessToken) {
-            console.log("Authorization successful!");
+            console.log('Authorization successful!');
             saveCredentials(credentials.accessToken.key, credentials.accessToken.secret);
         } else {
-            console.log("Authorization failed or was declined by the user.");
+            console.log('Authorization failed or was declined by the user.');
         }
     } catch (error) {
-        console.error("An error occurred during the Launchpad authentication process.");
+        console.error('An error occurred during the Launchpad authentication process.');
         console.error(error);
     }
 }
@@ -146,21 +145,24 @@ class Credentials {
     }
 
     // Step 1: Get Request Token
-    async getRequestToken(webRoot: string = LAUNCHPAD_ROOT, tokenFormat: string = "uri"): Promise<string | Record<string, any>> {
-        if (!this.consumerKey) throw new Error("Consumer not specified.");
-        if (this.accessToken) throw new Error("Access token already obtained.");
+    async getRequestToken(
+        webRoot: string = LAUNCHPAD_ROOT,
+        tokenFormat: string = 'uri',
+    ): Promise<string | Record<string, any>> {
+        if (!this.consumerKey) throw new Error('Consumer not specified.');
+        if (this.accessToken) throw new Error('Access token already obtained.');
 
         const params = {
             oauth_consumer_key: this.consumerKey,
-            oauth_signature_method: "PLAINTEXT",
-            oauth_signature: "&",
+            oauth_signature_method: 'PLAINTEXT',
+            oauth_signature: '&',
         };
         const url = `${webRoot}/${requestTokenPage}`;
-        const headers: Record<string, string> = { "Referer": webRoot };
-        if (tokenFormat === "dict") headers["Accept"] = "application/json";
+        const headers: Record<string, string> = { Referer: webRoot };
+        if (tokenFormat === 'dict') headers['Accept'] = 'application/json';
 
         const { content } = await httpPost(url, headers, params);
-        if (tokenFormat === "dict") {
+        if (tokenFormat === 'dict') {
             const data = JSON.parse(content);
             this.requestToken = AccessToken.fromParams(data);
             return data;
@@ -172,15 +174,15 @@ class Credentials {
 
     // Step 3: Exchange Request Token for Access Token
     async exchangeRequestTokenForAccessToken(webRoot: string = LAUNCHPAD_ROOT) {
-        if (!this.requestToken) throw new Error("getRequestToken() has not been called.");
+        if (!this.requestToken) throw new Error('getRequestToken() has not been called.');
         const params = {
             oauth_consumer_key: this.consumerKey,
-            oauth_signature_method: "PLAINTEXT",
+            oauth_signature_method: 'PLAINTEXT',
             oauth_token: this.requestToken.key,
             oauth_signature: `&${this.requestToken.secret}`,
         };
         const url = `${webRoot}/${accessTokenPage}`;
-        const headers: Record<string, string> = { "Referer": webRoot };
+        const headers: Record<string, string> = { Referer: webRoot };
 
         const { content } = await httpPost(url, headers, params);
         this.accessToken = AccessToken.fromString(content);
@@ -205,7 +207,7 @@ class RequestTokenAuthorizationEngine {
     async authorize(credentials: Credentials) {
         const authUrl = await credentials.getRequestToken(this.serviceRoot);
         console.log(`Please authorize the app by visiting this URL: ${authUrl}`);
-        readlineSync.question("Press Enter once you have completed the authorization in the browser.");
+        readlineSync.question('Press Enter once you have completed the authorization in the browser.');
         await credentials.exchangeRequestTokenForAccessToken(this.serviceRoot);
     }
 }
