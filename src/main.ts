@@ -2,7 +2,8 @@
 
 import { Command } from 'commander';
 import commit from './cmd/commit';
-import { authenticateWithLaunchpad } from './util/launchpad';
+import { Credentials, RequestTokenAuthorizationEngine } from './util/launchpad';
+
 
 const program = new Command();
 
@@ -22,7 +23,30 @@ function main(): void {
         .command('launchpad')
         .description('Test Launchpad API integration')
         .action(async () => {
-            await authenticateWithLaunchpad();
+            // Define the consumer key for your application (replace this with your actual consumer key)
+            const consumerKey = "evergit";
+
+            try {
+                // Step 1: Initialize credentials with the consumer key
+                const credentials = new Credentials(consumerKey);
+
+                // Step 2: Set up the authorization engine with Launchpad root URL and application name
+                const authEngine = new RequestTokenAuthorizationEngine(consumerKey);
+
+                // Step 3: Begin the authorization process
+                await authEngine.authorize(credentials);
+
+                if (credentials.accessToken) {
+                    console.log("Authorization successful!");
+                    console.log("Access Token:", credentials.accessToken.key);
+                    console.log("Access Token Secret:", credentials.accessToken.secret);
+                } else {
+                    console.log("Authorization failed or was declined by the user.");
+                }
+            } catch (error) {
+                console.error("An error occurred during the Launchpad authentication process.");
+                console.error(error);
+            }
         });
 
     program.parse(process.argv);
