@@ -1,10 +1,10 @@
 import axios from 'axios';
-import crypto from 'crypto';
 import inquirer from 'inquirer';
+import crypto from 'crypto';
 import { print } from './prompt';
 
 // OAuth credentials
-const CONSUMER_KEY = 'evergit'; // Replace with your actual consumer key
+const CONSUMER_KEY = 'evergit';
 
 // Launchpad OAuth endpoints
 const requestTokenUrl = 'https://launchpad.net/+request-token';
@@ -12,7 +12,7 @@ const authorizeUrl = 'https://launchpad.net/+authorize-token';
 const accessTokenUrl = 'https://launchpad.net/+access-token';
 
 // Helper function to generate a unique nonce
-function generateNonce(length = 32) {
+function generateNonce(length = 32): string {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     return Array.from(crypto.randomFillSync(new Uint8Array(length)))
         .map(x => charset[x % charset.length])
@@ -23,7 +23,7 @@ function generateNonce(length = 32) {
 async function getRequestToken() {
     const oauthTimestamp = Math.floor(Date.now() / 1000).toString();
     const oauthNonce = generateNonce();
-    const oauthSignature = '&'; // Signature is just "&" per Launchpad documentation
+    const oauthSignature = '%26';  // Signature as required by Launchpad
 
     const authorizationHeader = [
         `OAuth oauth_consumer_key="${CONSUMER_KEY}"`,
@@ -33,8 +33,6 @@ async function getRequestToken() {
         `oauth_nonce="${oauthNonce}"`,
         `oauth_version="1.0"`
     ].join(', ');
-
-    print('info', `Requesting token with authorization header:\n${authorizationHeader}`);
 
     try {
         const response = await axios.post(requestTokenUrl, null, {
@@ -48,6 +46,10 @@ async function getRequestToken() {
         const requestToken = params.get('oauth_token');
         const requestTokenSecret = params.get('oauth_token_secret');
 
+        if (!requestToken || !requestTokenSecret) {
+            throw new Error('Failed to obtain request token or request token secret.');
+        }
+
         print('info', 'Request token obtained.');
         return { requestToken, requestTokenSecret };
     } catch (error) {
@@ -56,16 +58,12 @@ async function getRequestToken() {
     }
 }
 
-// Step 2: Direct User to Authorize URL
-async function directUserToAuthorize(requestToken: string) {
+// Step 2: Display Authorization URL for User to Copy and Navigate
+async function authorizeRequestToken(requestToken: string) {
     const authorizeUrlWithToken = `${authorizeUrl}?oauth_token=${requestToken}`;
-    print('info', `Please open the following URL in your browser to authorize the application:\n${authorizeUrlWithToken}`);
+    print('info', `Please authorize the app by copying this URL into your browser:\n${authorizeUrlWithToken}`);
 
-    print(
-        'info',
-        `Please complete the authorization in your browser. Once done, return here and press Enter to continue.`
-    );
-
+    // Wait for user confirmation after they've authorized the app
     await inquirer.prompt({
         type: 'input',
         name: 'confirmed',
@@ -77,19 +75,23 @@ async function directUserToAuthorize(requestToken: string) {
 async function getAccessToken(requestToken: string, requestTokenSecret: string) {
     const oauthTimestamp = Math.floor(Date.now() / 1000).toString();
     const oauthNonce = generateNonce();
-    const oauthSignature = `&${requestTokenSecret}`; // Signature includes the request token secret
+
+    const token = {
+        key: requestToken,
+        secret: requestTokenSecret,
+    };
+
+    const oauthSignature = `%26${token.secret}`;  // Signature includes token secret
 
     const authorizationHeader = [
         `OAuth oauth_consumer_key="${CONSUMER_KEY}"`,
-        `oauth_token="${requestToken}"`,
+        `oauth_token="${token.key}"`,
         `oauth_signature_method="PLAINTEXT"`,
         `oauth_signature="${oauthSignature}"`,
         `oauth_timestamp="${oauthTimestamp}"`,
         `oauth_nonce="${oauthNonce}"`,
         `oauth_version="1.0"`
     ].join(', ');
-
-    print('info', `Requesting access token with authorization header:\n${authorizationHeader}`);
 
     try {
         const response = await axios.post(accessTokenUrl, null, {
@@ -103,6 +105,10 @@ async function getAccessToken(requestToken: string, requestTokenSecret: string) 
         const accessToken = params.get('oauth_token');
         const accessTokenSecret = params.get('oauth_token_secret');
 
+        if (!accessToken || !accessTokenSecret) {
+            throw new Error('Failed to obtain access token or access token secret.');
+        }
+
         print('success', 'Access token obtained.');
         return { accessToken, accessTokenSecret };
     } catch (error) {
@@ -111,49 +117,14 @@ async function getAccessToken(requestToken: string, requestTokenSecret: string) 
     }
 }
 
-// Step 4: Make Authenticated Request (example)
-async function makeAuthenticatedRequest(url: string, accessToken: string, accessTokenSecret: string) {
-    const oauthTimestamp = Math.floor(Date.now() / 1000).toString();
-    const oauthNonce = generateNonce();
-    const oauthSignature = `&${accessTokenSecret}`; // Signature includes access token secret
-
-    const authorizationHeader = [
-        `OAuth oauth_consumer_key="${CONSUMER_KEY}"`,
-        `oauth_token="${accessToken}"`,
-        `oauth_signature_method="PLAINTEXT"`,
-        `oauth_signature="${oauthSignature}"`,
-        `oauth_timestamp="${oauthTimestamp}"`,
-        `oauth_nonce="${oauthNonce}"`,
-        `oauth_version="1.0"`
-    ].join(', ');
-
-    print('info', `Making authenticated request with authorization header:\n${authorizationHeader}`);
-
-    try {
-        const response = await axios.get(url, {
-            headers: {
-                Authorization: authorizationHeader,
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        });
-        return response.data;
-    } catch (error) {
-        print('error', 'Error in authenticated request.');
-        throw error;
-    }
-}
-
-// Full Authentication Flow
+// Main Authentication Flow
 export async function authenticateWithLaunchpad() {
     try {
-        // Step 1: Get request token
+        // Step 1: Request token
         const { requestToken, requestTokenSecret } = await getRequestToken();
-        if (!requestToken || !requestTokenSecret) {
-            throw new Error('Failed to obtain request token or request token secret.');
-        }
 
-        // Step 2: Direct user to authorize URL in their browser
-        await directUserToAuthorize(requestToken);
+        // Step 2: Display authorization URL and wait for user to authorize
+        await authorizeRequestToken(requestToken);
 
         // Step 3: Exchange request token for access token
         const { accessToken, accessTokenSecret } = await getAccessToken(requestToken, requestTokenSecret);
@@ -162,28 +133,6 @@ export async function authenticateWithLaunchpad() {
         print('success', 'Authorization successful! Access token obtained.');
         print('content', `Access Token: ${accessToken}`);
         print('content', `Access Token Secret: ${accessTokenSecret}`);
-
-        // Optional: Test the access token with an API call (e.g., fetch bug info)
-        const { runTest } = await inquirer.prompt({
-            type: 'confirm',
-            name: 'runTest',
-            message: 'Would you like to test the access by retrieving a sample bug info?',
-            default: false,
-        });
-
-        if (runTest) {
-            if (accessToken && accessTokenSecret) {
-                const testResponse = await makeAuthenticatedRequest(
-                    'https://api.launchpad.net/1.0/bugs/1',
-                    accessToken,
-                    accessTokenSecret
-                );
-                print('info', 'Sample API response from Launchpad:');
-                console.log(testResponse);
-            } else {
-                print('error', 'Access token or access token secret is missing.');
-            }
-        }
     } catch (error) {
         print('error', 'An error occurred during the Launchpad authentication process.');
         console.error(error);
