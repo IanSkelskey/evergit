@@ -8,4 +8,3 @@
 - Refactored code for improved readability and error handling.
 - Utilized temporary files for git commit message construction.
 - General code prettification and refactoring for better code organization and functionality.
-
