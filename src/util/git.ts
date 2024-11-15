@@ -81,17 +81,13 @@ export function getDiffForStagedFiles(): string {
     return diff;
 }
 
-export function commitWithMessage(message: string): void {
-    const sanitizedMessage = sanitizeCommitMessage(message);
-    execSync(`git commit -m "${sanitizedMessage}"`);
-}
 
 export function getCurrentBranchName(): string {
     try {
         const branchName = execSync('git rev-parse --abbrev-ref HEAD', {
             encoding: 'utf-8',
         }).trim();
-
+        
         return branchName;
     } catch (error) {
         throw new Error('Unable to get current branch name.');
@@ -111,8 +107,13 @@ export function getEmail(): string {
     return execSync('git config user.email').toString().trim();
 }
 
+export function commitWithMessage(message: string): void {
+    const sanitizedMessage = sanitizeCommitMessage(message);
+    execSync(`git commit -m "${sanitizedMessage}"`);
+}
+
 export function sanitizeCommitMessage(message: string): string {
-    return message.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+    return message.replace(/"/g, '\\"');
 }
 
 export function checkForRemote(remoteUrl: string): boolean {
