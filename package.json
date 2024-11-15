@@ -21,11 +21,13 @@
         "commander": "^9.4.1",
         "inquirer": "^8.0.0",
         "oauth-1.0a": "^2.2.6",
+        "open": "^10.1.0",
         "openai": "^4.68.4"
     },
     "devDependencies": {
         "@types/axios": "^0.9.36",
         "@types/inquirer": "^9.0.7",
+        "@types/open": "^6.1.0",
         "prettier": "^3.3.3",
         "typescript": "^4.6.2"
     },

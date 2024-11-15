@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import commit from './cmd/commit';
-import { getRequestToken } from './util/launchpad';
+import { authenticateWithLaunchpad } from './util/launchpad';
 
 const program = new Command();
 
@@ -22,28 +22,13 @@ function main(): void {
         .command('launchpad')
         .description('Test Launchpad API integration')
         .action(async () => {
-            await testLaunchpadIntegration();
+            await authenticateWithLaunchpad();
         });
 
     program.parse(process.argv);
 
     if (!process.argv.slice(2).length) {
         program.outputHelp();
-    }
-}
-
-async function testLaunchpadIntegration() {
-    try {
-        // Step 1: Get request token
-        const { requestToken, requestTokenSecret } = await getRequestToken();
-
-        // Display the request token information
-        console.log('Request Token:', requestToken);
-        console.log('Request Token Secret:', requestTokenSecret);
-        
-        console.log(`Authorize the app by visiting: https://launchpad.net/+authorize-token?oauth_token=${requestToken}`);
-    } catch (error) {
-        console.error('Error in Launchpad test integration:', error);
     }
 }
 
