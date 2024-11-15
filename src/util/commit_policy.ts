@@ -1,4 +1,4 @@
-const CommitPolicy = `
+const COMMIT_POLICY = `
 # Evergreen ILS Commit Message Guidelines
 
 As an AI, you are expected to generate commit messages for the Evergreen ILS project that adhere to the following structure and standards:
@@ -29,4 +29,4 @@ Signed-off-by: your name <your_email@example.com>
 -   Keep messages **brief and descriptive**, avoiding restating the code diff.
 `;
 
-export default CommitPolicy;
+export default COMMIT_POLICY;

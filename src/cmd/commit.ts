@@ -10,7 +10,7 @@ import {
     stageFile,
     commitWithMessage,
 } from '../util/git';
-import CommitPolicy from '../util/commit_policy';
+import COMMIT_POLICY from '../util/commit_policy';
 import { selectFilesToStage, confirmCommitMessage, print } from '../util/prompt';
 import inquirer from 'inquirer';
 
@@ -32,7 +32,7 @@ async function commit(model: string): Promise<void> {
     const userInfo = getUserInfo();
     const bugNumber = await promptForBugNumber();
 
-    const systemPrompt = CommitPolicy;
+    const systemPrompt = COMMIT_POLICY;
     const userPrompt = buildUserPrompt(userInfo, bugNumber);
 
     const commitMessage = await createTextGeneration(systemPrompt, userPrompt);
