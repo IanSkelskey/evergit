@@ -56,6 +56,9 @@ async function main() {
 
     updateChangelog(newVersion, changelog);
 
+    // Run npm install
+    execSync('npm install'); // Update dependencies
+
     console.log(changelog); // Output changelog for CI use
 }
 
