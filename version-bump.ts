@@ -48,7 +48,7 @@ function getBranchCommits(): string[] {
 
 // Main function to run the bump and changelog
 async function main() {
-    const increment: semver.ReleaseType = process.argv[2] as semver.ReleaseType || 'patch';
+    const increment: semver.ReleaseType = (process.argv[2] as semver.ReleaseType) || 'patch';
     const newVersion = bumpVersion(increment);
 
     const commitMessages = getBranchCommits();
@@ -56,7 +56,7 @@ async function main() {
 
     updateChangelog(newVersion, changelog);
 
-    console.log(changelog);  // Output changelog for CI use
+    console.log(changelog); // Output changelog for CI use
 }
 
 main();

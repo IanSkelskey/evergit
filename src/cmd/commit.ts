@@ -54,7 +54,10 @@ async function commitWithoutBugInfo(userInfo: { name: string; email: string; dif
     generateAndProcessCommit(systemPrompt, userPrompt);
 }
 
-async function commitWithBugInfo(userInfo: { name: string; email: string; diff: string }, bugNumber: string): Promise<void> {
+async function commitWithBugInfo(
+    userInfo: { name: string; email: string; diff: string },
+    bugNumber: string,
+): Promise<void> {
     const credentials = await getLaunchPadCredentials();
     if (!credentials) {
         print('error', 'Failed to authenticate with Launchpad.');
@@ -67,7 +70,6 @@ async function commitWithBugInfo(userInfo: { name: string; email: string; diff: 
     const userPrompt = buildUserPrompt(userInfo, bugNumber, bugMessages);
     generateAndProcessCommit(systemPrompt, userPrompt);
 }
-
 
 // Helper function to authenticate with Launchpad
 async function getLaunchPadCredentials(): Promise<{ accessToken: string; accessTokenSecret: string } | null> {
@@ -106,7 +108,9 @@ function buildUserPrompt(
     bugMessages: BugMessage[] = [],
 ): string {
     const messages = bugMessages.map((message) => message.toString()).join('\n');
-    return bugNumber !== '' ? `User: ${userInfo.name} <${userInfo.email}>\n\nBug: ${bugNumber}\n\n${messages}\n\n${userInfo.diff}` : `User: ${userInfo.name} <${userInfo.email}>\n\n${userInfo.diff}`;
+    return bugNumber !== ''
+        ? `User: ${userInfo.name} <${userInfo.email}>\n\nBug: ${bugNumber}\n\n${messages}\n\n${userInfo.diff}`
+        : `User: ${userInfo.name} <${userInfo.email}>\n\n${userInfo.diff}`;
 }
 
 // Helper function to process and confirm the commit message with the user

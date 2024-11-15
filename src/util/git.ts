@@ -84,13 +84,12 @@ export function getDiffForStagedFiles(): string {
     return diff;
 }
 
-
 export function getCurrentBranchName(): string {
     try {
         const branchName = execSync('git rev-parse --abbrev-ref HEAD', {
             encoding: 'utf-8',
         }).trim();
-        
+
         return branchName;
     } catch (error) {
         throw new Error('Unable to get current branch name.');
@@ -113,7 +112,7 @@ export function getEmail(): string {
 export function commitWithMessage(message: string): void {
     const sanitizedMessage = sanitizeCommitMessage(message);
     const tempFilePath = path.join(os.tmpdir(), 'commit-message.txt');
-    
+
     fs.writeFileSync(tempFilePath, sanitizedMessage);
     execSync(`git commit -F "${tempFilePath}"`);
     fs.unlinkSync(tempFilePath); // Clean up the temporary file
