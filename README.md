@@ -14,7 +14,7 @@ An AI git helper for the Evergreen ILS project.
 
 ```bash
 npm install -g evergit
-```
+```  
 
 ## Usage
 
