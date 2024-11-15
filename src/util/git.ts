@@ -1,4 +1,7 @@
 import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 export enum GitFileStatus {
     'A' = 'Added',
@@ -109,7 +112,11 @@ export function getEmail(): string {
 
 export function commitWithMessage(message: string): void {
     const sanitizedMessage = sanitizeCommitMessage(message);
-    execSync(`git commit -m "${sanitizedMessage}"`);
+    const tempFilePath = path.join(os.tmpdir(), 'commit-message.txt');
+    
+    fs.writeFileSync(tempFilePath, sanitizedMessage);
+    execSync(`git commit -F "${tempFilePath}"`);
+    fs.unlinkSync(tempFilePath); // Clean up the temporary file
 }
 
 export function sanitizeCommitMessage(message: string): string {
