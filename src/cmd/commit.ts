@@ -13,6 +13,7 @@ import {
 import COMMIT_POLICY from '../util/commit_policy';
 import { selectFilesToStage, confirmCommitMessage, print } from '../util/prompt';
 import inquirer from 'inquirer';
+import { authenticateLaunchpad, loadCredentials, getBugInfo, BugMessage } from '../util/launchpad';
 
 async function commit(model: string): Promise<void> {
     if (model) {
@@ -32,8 +33,16 @@ async function commit(model: string): Promise<void> {
     const userInfo = getUserInfo();
     const bugNumber = await promptForBugNumber();
 
+    const credentials = await getLaunchPadCredentials();
+    if (!credentials) {
+        print('error', 'Failed to authenticate with Launchpad.');
+        return;
+    }
+    const bug = await getBugInfo(bugNumber, credentials.accessToken, credentials.accessTokenSecret);
+    const bugMessages = await bug.getMessages();
+
     const systemPrompt = COMMIT_POLICY;
-    const userPrompt = buildUserPrompt(userInfo, bugNumber);
+    const userPrompt = buildUserPrompt(userInfo, bugNumber, bugMessages);
 
     const commitMessage = await createTextGeneration(systemPrompt, userPrompt);
     if (commitMessage) {
@@ -41,6 +50,12 @@ async function commit(model: string): Promise<void> {
     } else {
         print('error', 'Failed to generate commit message.');
     }
+}
+
+// Helper function to authenticate with Launchpad
+async function getLaunchPadCredentials(): Promise<{ accessToken: string; accessTokenSecret: string } | null> {
+    authenticateLaunchpad('evergit');
+    return loadCredentials();
 }
 
 // Helper function to validate if the current directory is a Git repository with changes
@@ -78,24 +93,17 @@ async function promptForBugNumber(): Promise<string> {
 }
 
 // Helper function to build the user prompt string for text generation
-function buildUserPrompt(userInfo: { name: string; email: string; diff: string }, bugNumber: string): string {
-    return `
-    Diff:
-    ${userInfo.diff}
-
-    User Information:
-    Name: ${userInfo.name}
-    Email: ${userInfo.email}
-
-    Launchpad Bug Number: ${bugNumber}
-  `;
+function buildUserPrompt(
+    userInfo: { name: string; email: string; diff: string },
+    bugNumber: string,
+    bugMessages: BugMessage[],
+): string {
+    const messages = bugMessages.map((message) => message.toString()).join('\n');
+    return `${userInfo.name} <${userInfo.email}>\n\n${userInfo.diff}\n\n${messages}`;
 }
 
 // Helper function to process and confirm the commit message with the user
 async function processCommitMessage(commitMessage: string): Promise<void> {
-    print('info', 'Generated Commit Message:');
-    print('content', commitMessage);
-
     const confirmed = await confirmCommitMessage(commitMessage);
     if (confirmed) {
         commitWithMessage(commitMessage);

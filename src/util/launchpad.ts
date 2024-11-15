@@ -14,7 +14,7 @@ const LAUNCHPAD_ROOT = 'https://launchpad.net';
 const CONFIG_DIR = join(os.homedir(), '.evergit');
 const CONFIG_FILE = join(CONFIG_DIR, 'auth.json');
 
-async function getBugInfo(bugId: string, accessToken: string, accessTokenSecret: string) {
+async function getBugInfo(bugId: string, accessToken: string, accessTokenSecret: string): Promise<Bug> {
     const endpoint = `https://api.launchpad.net/1.0/bugs/${bugId}`;
 
     const headers = {
@@ -23,21 +23,10 @@ async function getBugInfo(bugId: string, accessToken: string, accessTokenSecret:
 
     try {
         const response = await axios.get(endpoint, { headers });
-        return response.data;
+        const data = response.data as { id: string; title: string; description: string };
+        return new Bug(data.id, data.title, data.description);
     } catch (error) {
         console.error('Error fetching bug information:', error);
-        throw error;
-    }
-}
-
-async function getBugMessages(bugId: string) {
-    const endpoint = `https://api.launchpad.net/1.0/bugs/${bugId}/messages`;
-
-    try {
-        const response = await axios.get(endpoint);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching bug messages:', error);
         throw error;
     }
 }
@@ -212,4 +201,59 @@ class RequestTokenAuthorizationEngine {
     }
 }
 
-export { authenticateLaunchpad, loadCredentials, getBugInfo, getBugMessages };
+class Bug {
+    id: string;
+    title: string;
+    description: string;
+    endpoint: string;
+
+    constructor(id: string, title: string, description: string) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.endpoint = `https://api.launchpad.net/1.0/bugs/${id}`;
+    }
+
+    async getMessages(): Promise<BugMessage[]> {
+        try {
+            const response = await axios.get(`${this.endpoint}/messages`);
+            const data = response.data as {
+                entries: { subject: string; content: string; owner_link: string; self_link: string }[];
+            };
+            return data.entries.map((entry: any) => {
+                const owner = entry.owner_link.split('/').pop();
+                const id = parseInt(entry.self_link.split('/').pop());
+                return new BugMessage(id, entry.subject, entry.content, owner);
+            });
+        } catch (error) {
+            console.error('Error fetching bug messages:', error);
+            throw error;
+        }
+    }
+}
+
+class BugMessage {
+    id: number;
+    subject: string;
+    content: string;
+    owner: string;
+
+    constructor(id: number, subject: string, content: string, owner: string) {
+        this.id = id;
+        this.subject = subject;
+        this.content = content;
+        this.owner = owner;
+    }
+
+    toString(): string {
+        // Return a markdown-formatted string
+        return `
+        ### Message ${this.id}
+        **Subject**: ${this.subject}
+        **Owner**: ${this.owner}
+        **Content**: ${this.content}
+        `;
+    }
+}
+
+export { authenticateLaunchpad, loadCredentials, getBugInfo, Bug, BugMessage };
