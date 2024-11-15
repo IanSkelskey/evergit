@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import commit from './cmd/commit';
-import { authenticateLaunchpad } from './util/launchpad';
+import { authenticateLaunchpad, loadCredentials, getBugInfo } from './util/launchpad';
 
 
 const program = new Command();
@@ -24,6 +24,11 @@ function main(): void {
         .description('Test Launchpad API integration')
         .action(async () => {
             authenticateLaunchpad('evergit');
+            const credentials = loadCredentials();
+            if (credentials) {
+                const bugInfo = await getBugInfo('1', credentials.accessToken, credentials.accessTokenSecret);
+                console.log(bugInfo);
+            }
         });
 
     program.parse(process.argv);

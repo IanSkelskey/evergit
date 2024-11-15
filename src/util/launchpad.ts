@@ -15,7 +15,23 @@ const LAUNCHPAD_ROOT = "https://launchpad.net";
 const CONFIG_DIR = join(os.homedir(), '.evergit');
 const CONFIG_FILE = join(CONFIG_DIR, 'auth.json');
 
-export function saveCredentials(accessToken: string, accessTokenSecret: string) {
+async function getBugInfo(bugId: string, accessToken: string, accessTokenSecret: string) {
+    const endpoint = `https://api.launchpad.net/1.0/bugs/${bugId}`;
+
+    const headers = {
+        Authorization: `OAuth oauth_consumer_key="evergit", oauth_token="${accessToken}", oauth_signature_method="PLAINTEXT", oauth_signature="%26${accessTokenSecret}"`,
+    };
+
+    try {
+        const response = await axios.get(endpoint, { headers });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching bug information:", error);
+        throw error;
+    }
+}
+
+function saveCredentials(accessToken: string, accessTokenSecret: string) {
     if (!existsSync(CONFIG_DIR)) {
         mkdirSync(CONFIG_DIR, { recursive: true });
     }
@@ -24,7 +40,7 @@ export function saveCredentials(accessToken: string, accessTokenSecret: string) 
     writeFileSync(CONFIG_FILE, JSON.stringify(credentials), { mode: 0o600 });
 }
 
-export function loadCredentials(): { accessToken: string, accessTokenSecret: string } | null {
+function loadCredentials(): { accessToken: string, accessTokenSecret: string } | null {
     if (existsSync(CONFIG_FILE)) {
         const data = readFileSync(CONFIG_FILE, 'utf8');
         return JSON.parse(data);
@@ -32,7 +48,7 @@ export function loadCredentials(): { accessToken: string, accessTokenSecret: str
     return null;
 }
 
-export async function authenticateLaunchpad(consumerKey: string) {
+async function authenticateLaunchpad(consumerKey: string) {
     const storedCredentials = loadCredentials();
 
     if (storedCredentials) {
@@ -182,4 +198,4 @@ class RequestTokenAuthorizationEngine {
     }
 }
 
-export { HTTPError, AccessToken, Credentials, RequestTokenAuthorizationEngine };
+export { authenticateLaunchpad, loadCredentials, getBugInfo };
