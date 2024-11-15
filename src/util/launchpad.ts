@@ -3,17 +3,16 @@ import OAuth from 'oauth-1.0a';
 import crypto from 'crypto';
 
 // OAuth credentials - replace with actual credentials or use environment variables
-const consumerKey = process.env.LAUNCHPAD_CONSUMER_KEY || '';
-const consumerSecret = process.env.LAUNCHPAD_CONSUMER_SECRET || '';
+const CONSUMER_KEY = 'evergit';
 
 // Launchpad OAuth endpoints
 const requestTokenUrl = 'https://launchpad.net/+request-token';
 const authorizeUrl = 'https://launchpad.net/+authorize-token';
 const accessTokenUrl = 'https://launchpad.net/+access-token';
 
-// Initialize OAuth
+// Initialize OAuth without a consumer secret
 const oauth = new OAuth({
-  consumer: { key: consumerKey, secret: consumerSecret },
+  consumer: { key: CONSUMER_KEY, secret: '' },  // No consumer secret
   signature_method: 'PLAINTEXT',
   hash_function(base_string: crypto.BinaryLike, key: crypto.BinaryLike | crypto.KeyObject) {
     return crypto.createHmac('sha1', key).update(base_string).digest('base64');
@@ -27,8 +26,11 @@ export async function getRequestToken() {
     method: 'POST',
   };
 
+  const headers = oauth.toHeader(oauth.authorize(requestData));
+  headers.Authorization = headers.Authorization.replace('oauth_signature="&"', `oauth_signature="%26"`);  // Ensure signature starts with '&'
+
   const response = await axios.post(requestData.url, null, {
-    headers: oauth.toHeader(oauth.authorize(requestData)),
+    headers,
   });
 
   const params = new URLSearchParams(response.data as string);
@@ -51,8 +53,11 @@ export async function getAccessToken(requestToken: string, requestTokenSecret: s
     secret: requestTokenSecret,
   };
 
+  const headers = oauth.toHeader(oauth.authorize(requestData, token));
+  headers.Authorization = headers.Authorization.replace('oauth_signature="&"', `oauth_signature="%26${token.secret}"`);  // Signature includes token secret
+
   const response = await axios.post(requestData.url, null, {
-    headers: oauth.toHeader(oauth.authorize(requestData, token)),
+    headers,
     params: { oauth_verifier: verifier },
   });
 
@@ -75,8 +80,11 @@ export async function makeAuthenticatedRequest(url: string, accessToken: string,
     secret: accessTokenSecret,
   };
 
+  const headers = oauth.toHeader(oauth.authorize(requestData, token));
+  headers.Authorization = headers.Authorization.replace('oauth_signature="&"', `oauth_signature="%26${token.secret}"`);  // Signature includes access token secret
+
   const response = await axios.get(requestData.url, {
-    headers: oauth.toHeader(oauth.authorize(requestData, token)),
+    headers,
   });
 
   return response.data;
