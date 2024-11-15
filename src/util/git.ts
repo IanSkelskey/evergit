@@ -112,7 +112,7 @@ export function getEmail(): string {
 }
 
 export function sanitizeCommitMessage(message: string): string {
-    return message.replace(/"/g, '\\"');
+    return message.split('\n').map(line => line.replace(/"/g, '\\"')).join('\n');
 }
 
 export function checkForRemote(remoteUrl: string): boolean {
