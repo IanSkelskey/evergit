@@ -11,8 +11,7 @@ import {
     commitWithMessage,
 } from '../util/git';
 import COMMIT_POLICY from '../util/commit_policy';
-import { selectFilesToStage, confirmCommitMessage, print } from '../util/prompt';
-import inquirer from 'inquirer';
+import { selectFilesToStage, confirmCommitMessage, print, requestLaunchpadBugNumber } from '../util/prompt';
 import { authenticateLaunchpad, loadCredentials, getBugInfo, BugMessage } from '../util/launchpad';
 
 async function commit(model: string): Promise<void> {
@@ -31,8 +30,31 @@ async function commit(model: string): Promise<void> {
     print('info', `Committing changes to branch ${branch}`);
 
     const userInfo = getUserInfo();
-    const bugNumber = await promptForBugNumber();
+    const bugNumber = await requestLaunchpadBugNumber();
 
+    if (bugNumber !== '') {
+        await commitWithBugInfo(userInfo, bugNumber);
+    } else {
+        commitWithoutBugInfo(userInfo);
+    }
+}
+
+async function generateAndProcessCommit(systemPrompt: string, userPrompt: string): Promise<void> {
+    const commitMessage = await createTextGeneration(systemPrompt, userPrompt);
+    if (commitMessage) {
+        await processCommitMessage(commitMessage);
+    } else {
+        print('error', 'Failed to generate commit message.');
+    }
+}
+
+async function commitWithoutBugInfo(userInfo: { name: string; email: string; diff: string }): Promise<void> {
+    const systemPrompt = COMMIT_POLICY;
+    const userPrompt = buildUserPrompt(userInfo);
+    generateAndProcessCommit(systemPrompt, userPrompt);
+}
+
+async function commitWithBugInfo(userInfo: { name: string; email: string; diff: string }, bugNumber: string): Promise<void> {
     const credentials = await getLaunchPadCredentials();
     if (!credentials) {
         print('error', 'Failed to authenticate with Launchpad.');
@@ -43,14 +65,9 @@ async function commit(model: string): Promise<void> {
 
     const systemPrompt = COMMIT_POLICY;
     const userPrompt = buildUserPrompt(userInfo, bugNumber, bugMessages);
-
-    const commitMessage = await createTextGeneration(systemPrompt, userPrompt);
-    if (commitMessage) {
-        await processCommitMessage(commitMessage);
-    } else {
-        print('error', 'Failed to generate commit message.');
-    }
+    generateAndProcessCommit(systemPrompt, userPrompt);
 }
+
 
 // Helper function to authenticate with Launchpad
 async function getLaunchPadCredentials(): Promise<{ accessToken: string; accessTokenSecret: string } | null> {
@@ -82,24 +99,14 @@ function getUserInfo(): { name: string; email: string; diff: string } {
     };
 }
 
-// Helper function to prompt for a Launchpad bug number
-async function promptForBugNumber(): Promise<string> {
-    const answer = await inquirer.prompt({
-        type: 'input',
-        name: 'bugNumber',
-        message: 'Enter the Launchpad bug number (if applicable):',
-    });
-    return answer.bugNumber;
-}
-
 // Helper function to build the user prompt string for text generation
 function buildUserPrompt(
     userInfo: { name: string; email: string; diff: string },
-    bugNumber: string,
-    bugMessages: BugMessage[],
+    bugNumber: string = '',
+    bugMessages: BugMessage[] = [],
 ): string {
     const messages = bugMessages.map((message) => message.toString()).join('\n');
-    return `${userInfo.name} <${userInfo.email}>\n\n${userInfo.diff}\n\n${messages}`;
+    return bugNumber !== '' ? `User: ${userInfo.name} <${userInfo.email}>\n\nBug: ${bugNumber}\n\n${messages}\n\n${userInfo.diff}` : `User: ${userInfo.name} <${userInfo.email}>\n\n${userInfo.diff}`;
 }
 
 // Helper function to process and confirm the commit message with the user

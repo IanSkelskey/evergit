@@ -30,6 +30,14 @@ export async function confirmCommitMessage(commitMessage: string): Promise<boole
 }
 
 export async function requestLaunchpadBugNumber(): Promise<string> {
+    const confirm = await inquirer.prompt({
+        type: 'confirm',
+        name: 'hasBug',
+        message: 'Is this commit related to a Launchpad bug?',
+    });
+    if (!confirm.hasBug) {
+        return '';
+    }
     const answer = await inquirer.prompt({
         type: 'input',
         name: 'bugNumber',

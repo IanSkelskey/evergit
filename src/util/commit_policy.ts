@@ -27,6 +27,7 @@ Signed-off-by: your name <your_email@example.com>
 -   Use **present tense** for the Release-Note entry.
 -   Ensure **testing steps** are clear if included.
 -   Keep messages **brief and descriptive**, avoiding restating the code diff.
+-   If a launchpad bug number is not provided, **omit the LP# prefix** from the subject line.
 `;
 
 export default COMMIT_POLICY;

@@ -72,7 +72,13 @@ export function getDiffForAll(): string {
 }
 
 export function getDiffForStagedFiles(): string {
-    return execSync('git diff --staged').toString();
+    var diff: string = execSync('git diff --staged').toString();
+    // if the file is package-lock.json, remove that file from the diff
+    if (diff.includes('diff --git a/package-lock.json b/package-lock.json')) {
+        const regex = /diff --git a\/package-lock.json b\/package-lock.json[\s\S]*?(?=diff --git|$)/g;
+        diff = diff.replace(regex, '');
+    }
+    return diff;
 }
 
 export function commitWithMessage(message: string): void {
