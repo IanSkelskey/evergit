@@ -11,9 +11,10 @@ async function generateChangelog(commitMessages: string[]): Promise<string> {
     return changelog || 'Error generating changelog';
 }
 
-// Function to bump the version in package.json
+// Function to bump the version in package.json and update README.md badge
 function bumpVersion(increment: semver.ReleaseType): string {
     const packageJsonPath = './package.json';
+    const readmePath = './README.md';
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     const currentVersion = packageJson.version;
     const newVersion = semver.inc(currentVersion, increment) || currentVersion;
@@ -21,6 +22,16 @@ function bumpVersion(increment: semver.ReleaseType): string {
 
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
     console.log(`Version bumped from ${currentVersion} to ${newVersion}`);
+
+    // Update version badge in README.md
+    const readmeContent = fs.readFileSync(readmePath, 'utf8');
+    const updatedReadmeContent = readmeContent.replace(
+        /!\[Version\]\(https:\/\/img.shields.io\/badge\/version-[\d.]+-blue\)/,
+        `![Version](https://img.shields.io/badge/version-${newVersion}-blue)`
+    );
+    fs.writeFileSync(readmePath, updatedReadmeContent);
+    console.log(`README.md updated with new version badge ${newVersion}`);
+
     return newVersion;
 }
 

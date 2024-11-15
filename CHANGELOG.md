@@ -2,16 +2,10 @@
 
 ## Changelog Summary
 
-- **Enhancements:**
-  - Improved commit message handling by replacing newline characters with escape sequences for better multi-line support.
-  - Enhanced commit flow with Launchpad bug integration.
-
-- **Refactoring:**
-  - Refactored `commitWithMessage` function.
-  - Improved `sanitizeCommitMessage` logic to handle multi-line messages.
-  - Refactored code for better readability and error handling.
-
-- **Other Changes:**
-  - Utilized a temporary file for constructing git commit messages.
-  - Prettified the codebase.
+- Enhanced version bump and changelog handling.
+- Improved commit flow with Launchpad bug integration.
+- Enhanced commit message handling by improved sanitization logic, specifically replacing newline characters with escape sequences for better multi-line support.
+- Refactored code for improved readability and error handling.
+- Utilized temporary files for git commit message construction.
+- General code prettification and refactoring for better code organization and functionality.
 
