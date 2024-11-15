@@ -27,7 +27,7 @@ function bumpVersion(increment: semver.ReleaseType): string {
     const readmeContent = fs.readFileSync(readmePath, 'utf8');
     const updatedReadmeContent = readmeContent.replace(
         /!\[Version\]\(https:\/\/img.shields.io\/badge\/version-[\d.]+-blue\)/,
-        `![Version](https://img.shields.io/badge/version-${newVersion}-blue)`
+        `![Version](https://img.shields.io/badge/version-${newVersion}-blue)`,
     );
     fs.writeFileSync(readmePath, updatedReadmeContent);
     console.log(`README.md updated with new version badge ${newVersion}`);
