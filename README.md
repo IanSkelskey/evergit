@@ -1,6 +1,6 @@
 # `evergit`
 
-![Version](https://img.shields.io/badge/version-0.0.1-blue)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
 
 ![TypeScript](https://img.shields.io/badge/typescript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-00A79D?style=for-the-badge&logo=openai&logoColor=white)

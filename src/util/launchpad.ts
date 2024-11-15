@@ -4,6 +4,7 @@ import { URLSearchParams } from 'url';
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import os from 'os';
+import { print, waitForAuthorization } from './prompt';
 
 // Define constants for Launchpad OAuth endpoints
 const requestTokenPage = '+request-token';
@@ -26,7 +27,7 @@ async function getBugInfo(bugId: string, accessToken: string, accessTokenSecret:
         const data = response.data as { id: string; title: string; description: string };
         return new Bug(data.id, data.title, data.description);
     } catch (error) {
-        console.error('Error fetching bug information:', error);
+        print('error', 'Error fetching bug information.');
         throw error;
     }
 }
@@ -52,9 +53,7 @@ async function authenticateLaunchpad(consumerKey: string) {
     const storedCredentials = loadCredentials();
 
     if (storedCredentials) {
-        console.log('Using stored credentials.');
-        console.log('Access Token:', storedCredentials.accessToken);
-        console.log('Access Token Secret:', storedCredentials.accessTokenSecret);
+        print('success', 'Already authorized with Launchpad.');
         return;
     }
 
@@ -65,13 +64,13 @@ async function authenticateLaunchpad(consumerKey: string) {
         await authEngine.authorize(credentials);
 
         if (credentials.accessToken) {
-            console.log('Authorization successful!');
+            print('success', 'Authorization successful.');
             saveCredentials(credentials.accessToken.key, credentials.accessToken.secret);
         } else {
-            console.log('Authorization failed or was declined by the user.');
+            print('error', 'Authorization failed.');
         }
     } catch (error) {
-        console.error('An error occurred during the Launchpad authentication process.');
+        print('error', 'Error authorizing with Launchpad.');
         console.error(error);
     }
 }
@@ -195,8 +194,7 @@ class RequestTokenAuthorizationEngine {
 
     async authorize(credentials: Credentials) {
         const authUrl = await credentials.getRequestToken(this.serviceRoot);
-        console.log(`Please authorize the app by visiting this URL: ${authUrl}`);
-        readlineSync.question('Press Enter once you have completed the authorization in the browser.');
+        await waitForAuthorization(authUrl as string);
         await credentials.exchangeRequestTokenForAccessToken(this.serviceRoot);
     }
 }

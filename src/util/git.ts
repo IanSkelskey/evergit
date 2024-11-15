@@ -1,4 +1,7 @@
 import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 export enum GitFileStatus {
     'A' = 'Added',
@@ -72,12 +75,13 @@ export function getDiffForAll(): string {
 }
 
 export function getDiffForStagedFiles(): string {
-    return execSync('git diff --staged').toString();
-}
-
-export function commitWithMessage(message: string): void {
-    const sanitizedMessage = sanitizeCommitMessage(message);
-    execSync(`git commit -m "${sanitizedMessage}"`);
+    var diff: string = execSync('git diff --staged').toString();
+    // if the file is package-lock.json, remove that file from the diff
+    if (diff.includes('diff --git a/package-lock.json b/package-lock.json')) {
+        const regex = /diff --git a\/package-lock.json b\/package-lock.json[\s\S]*?(?=diff --git|$)/g;
+        diff = diff.replace(regex, '');
+    }
+    return diff;
 }
 
 export function getCurrentBranchName(): string {
@@ -103,6 +107,15 @@ export function getName(): string {
 
 export function getEmail(): string {
     return execSync('git config user.email').toString().trim();
+}
+
+export function commitWithMessage(message: string): void {
+    const sanitizedMessage = sanitizeCommitMessage(message);
+    const tempFilePath = path.join(os.tmpdir(), 'commit-message.txt');
+
+    fs.writeFileSync(tempFilePath, sanitizedMessage);
+    execSync(`git commit -F "${tempFilePath}"`);
+    fs.unlinkSync(tempFilePath); // Clean up the temporary file
 }
 
 export function sanitizeCommitMessage(message: string): string {

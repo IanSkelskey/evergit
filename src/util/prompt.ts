@@ -9,6 +9,15 @@ const colors: Record<string, (message: string) => string> = {
     content: chalk.grey,
 };
 
+export async function waitForAuthorization(authUrl: string): Promise<void> {
+    print('info', `Please authorize the app by visiting this URL: ${authUrl}`);
+    await inquirer.prompt({
+        type: 'input',
+        name: 'authorization',
+        message: 'Press Enter once you have completed the authorization in the browser.',
+    });
+}
+
 export async function confirmCommitMessage(commitMessage: string): Promise<boolean> {
     print('info', 'Commit message:');
     print('content', commitMessage);
@@ -21,6 +30,14 @@ export async function confirmCommitMessage(commitMessage: string): Promise<boole
 }
 
 export async function requestLaunchpadBugNumber(): Promise<string> {
+    const confirm = await inquirer.prompt({
+        type: 'confirm',
+        name: 'hasBug',
+        message: 'Is this commit related to a Launchpad bug?',
+    });
+    if (!confirm.hasBug) {
+        return '';
+    }
     const answer = await inquirer.prompt({
         type: 'input',
         name: 'bugNumber',
