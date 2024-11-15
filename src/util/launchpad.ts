@@ -32,6 +32,34 @@ export function loadCredentials(): { accessToken: string, accessTokenSecret: str
     return null;
 }
 
+export async function authenticateLaunchpad(consumerKey: string) {
+    const storedCredentials = loadCredentials();
+
+    if (storedCredentials) {
+        console.log("Using stored credentials.");
+        console.log("Access Token:", storedCredentials.accessToken);
+        console.log("Access Token Secret:", storedCredentials.accessTokenSecret);
+        return;
+    }
+
+    const credentials = new Credentials(consumerKey);
+    const authEngine = new RequestTokenAuthorizationEngine(consumerKey);
+
+    try {
+        await authEngine.authorize(credentials);
+
+        if (credentials.accessToken) {
+            console.log("Authorization successful!");
+            saveCredentials(credentials.accessToken.key, credentials.accessToken.secret);
+        } else {
+            console.log("Authorization failed or was declined by the user.");
+        }
+    } catch (error) {
+        console.error("An error occurred during the Launchpad authentication process.");
+        console.error(error);
+    }
+}
+
 // Error class for handling HTTP errors
 class HTTPError extends Error {
     status: number;
