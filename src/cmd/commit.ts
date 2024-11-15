@@ -1,34 +1,37 @@
-import { createTextGeneration } from '../util/ai';
+import { createTextGeneration, setModel } from '../util/ai';
 import { isInGitRepo, hasGitChanges, getCurrentBranchName, getDiffForStagedFiles, getName, getEmail, listChangedFiles, stageFile, commitWithMessage } from '../util/git';
 import CommitPolicy from '../util/commit_policy';
 import { selectFilesToStage, confirmCommitMessage, print } from '../util/prompt';
 import inquirer from 'inquirer';
 
-async function commit(): Promise<void> {
-  if (!validateWorkingDirectory()) {
-    return;
-  }
+async function commit(model: string): Promise<void> {
 
-  const changedFiles = listChangedFiles();
-  const filesToStage = await selectFilesToStage(changedFiles);
-  filesToStage.forEach(stageFile);
+	setModel(model);
 
-  const branch = getCurrentBranchName();
-  console.log(`Current branch: ${branch}`);
+	if (!validateWorkingDirectory()) {
+		return;
+	}
 
-  const userDiff = getDiffForStagedFiles();
-  const userName = getName();
-  const userEmail = getEmail();
+	const changedFiles = listChangedFiles();
+	const filesToStage = await selectFilesToStage(changedFiles);
+	filesToStage.forEach(stageFile);
 
-  const bugNumberAnswer = await inquirer.prompt({
-    type: 'input',
-    name: 'bugNumber',
-    message: 'Enter the Launchpad bug number (if applicable):',
-  });
-  const bugNumber = bugNumberAnswer.bugNumber;
+	const branch = getCurrentBranchName();
+	console.log(`Current branch: ${branch}`);
 
-  const systemPrompt = CommitPolicy;
-  const userPrompt = `
+	const userDiff = getDiffForStagedFiles();
+	const userName = getName();
+	const userEmail = getEmail();
+
+	const bugNumberAnswer = await inquirer.prompt({
+		type: 'input',
+		name: 'bugNumber',
+		message: 'Enter the Launchpad bug number (if applicable):',
+	});
+	const bugNumber = bugNumberAnswer.bugNumber;
+
+	const systemPrompt = CommitPolicy;
+	const userPrompt = `
     Diff:
     ${userDiff}
 
@@ -39,29 +42,29 @@ async function commit(): Promise<void> {
     Launchpad Bug Number: ${bugNumber}
   `;
 
-  const commitMessage = await createTextGeneration(systemPrompt, userPrompt);
-  if (commitMessage) {
-    print('info', 'Generated Commit Message:');
-    print('content', commitMessage);
+	const commitMessage = await createTextGeneration(systemPrompt, userPrompt);
+	if (commitMessage) {
+		print('info', 'Generated Commit Message:');
+		print('content', commitMessage);
 
-    const confirmed = await confirmCommitMessage(commitMessage);
-    if (confirmed) {
-      commitWithMessage(commitMessage);
-      print('success', 'Commit successful.');
-    } else {
-      print('warning', 'Commit aborted.');
-    }
-  } else {
-    print('error', 'Failed to generate commit message.');
-  }
+		const confirmed = await confirmCommitMessage(commitMessage);
+		if (confirmed) {
+			commitWithMessage(commitMessage);
+			print('success', 'Commit successful.');
+		} else {
+			print('warning', 'Commit aborted.');
+		}
+	} else {
+		print('error', 'Failed to generate commit message.');
+	}
 }
 
 function validateWorkingDirectory(): boolean {
-  if (!isInGitRepo() || !hasGitChanges()) {
-    console.error(!isInGitRepo() ? 'Not in a git repository.' : 'No changes detected.');
-    return false;
-  }
-  return true;
+	if (!isInGitRepo() || !hasGitChanges()) {
+		console.error(!isInGitRepo() ? 'Not in a git repository.' : 'No changes detected.');
+		return false;
+	}
+	return true;
 }
 
 export default commit;

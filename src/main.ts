@@ -16,7 +16,7 @@ function main(): void {
 		.command('commit')
 		.description('Run the evergreen commit workflow')
 		.option('-m <model>', 'Set the OpenAI model to use', 'gpt-4o')
-		.action(async () => { await commit(); });
+		.action(async (options) => { await commit(options.model); });
 
 	program.parse(process.argv);
 
