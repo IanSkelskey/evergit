@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import commit from './cmd/commit';
-import { authenticateLaunchpad, loadCredentials, getBugInfo } from './util/launchpad';
+import { authenticateLaunchpad, loadCredentials, getBugInfo, getBugMessages } from './util/launchpad';
 
 
 const program = new Command();
@@ -26,8 +26,10 @@ function main(): void {
             authenticateLaunchpad('evergit');
             const credentials = loadCredentials();
             if (credentials) {
-                const bugInfo = await getBugInfo('1', credentials.accessToken, credentials.accessTokenSecret);
+                const bugInfo = await getBugInfo('2086709', credentials.accessToken, credentials.accessTokenSecret);
                 console.log(bugInfo);
+                const bugMessages = await getBugMessages('2086709');
+                console.log(bugMessages);
             }
         });
 

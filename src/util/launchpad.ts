@@ -31,6 +31,18 @@ async function getBugInfo(bugId: string, accessToken: string, accessTokenSecret:
     }
 }
 
+async function getBugMessages(bugId: string) {
+    const endpoint = `https://api.launchpad.net/1.0/bugs/${bugId}/messages`;
+
+    try {
+        const response = await axios.get(endpoint);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching bug messages:", error);
+        throw error;
+    }
+}
+
 function saveCredentials(accessToken: string, accessTokenSecret: string) {
     if (!existsSync(CONFIG_DIR)) {
         mkdirSync(CONFIG_DIR, { recursive: true });
@@ -198,4 +210,4 @@ class RequestTokenAuthorizationEngine {
     }
 }
 
-export { authenticateLaunchpad, loadCredentials, getBugInfo };
+export { authenticateLaunchpad, loadCredentials, getBugInfo, getBugMessages };
