@@ -9,3 +9,6 @@ dist/
 
 # Logs
 npm-debug.log*
+
+# Development
+.VSCodeCounter/
