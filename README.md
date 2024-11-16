@@ -12,17 +12,17 @@ An AI-powered Git helper for the Evergreen ILS project. Evergit uses OpenAI’s 
 
 ## Features
 
-- Generate commit messages using OpenAI's LLM models.
-- Automatically reference Launchpad bugs in commit messages.
-- Automatically sign off commits with the user's name and email.
-- Select files to stage for commit.
-- Use different models by specifying the model name as an argument.
+-   Generate commit messages using OpenAI's LLM models.
+-   Automatically reference Launchpad bugs in commit messages.
+-   Automatically sign off commits with the user's name and email.
+-   Select files to stage for commit.
+-   Use different models by specifying the model name as an argument.
 
 ## Requirements
 
-- `Node.js`, `npm`, and `Git` must be installed on your system.
-- OpenAI API key (stored in the `OPENAI_API_KEY` environment variable)
-- A launchpad account is required to reference bugs in commit messages.
+-   `Node.js`, `npm`, and `Git` must be installed on your system.
+-   OpenAI API key (stored in the `OPENAI_API_KEY` environment variable)
+-   A launchpad account is required to reference bugs in commit messages.
 
 ## Installation
 
@@ -55,7 +55,7 @@ evergit commit                      # Uses the default model
 
 ##### Options
 
-- `--model <model-name>`: Use a specific model to generate the commit message.
+-   `--model <model-name>`: Use a specific model to generate the commit message.
 
 ```bash
 evergit commit --model <model-name> # Uses a specific model

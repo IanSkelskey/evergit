@@ -9,10 +9,16 @@ import {
     listChangedFiles,
     stageFile,
     commitWithMessage,
-    unstageAllFiles
+    unstageAllFiles,
 } from '../util/git';
 import COMMIT_POLICY from '../util/commit_policy';
-import { selectFilesToStage, confirmCommitMessage, print, requestLaunchpadBugNumber, requestFeedback } from '../util/prompt';
+import {
+    selectFilesToStage,
+    confirmCommitMessage,
+    print,
+    requestLaunchpadBugNumber,
+    requestFeedback,
+} from '../util/prompt';
 import { authenticateLaunchpad, loadCredentials, getBugInfo, BugMessage } from '../util/launchpad';
 
 async function commit(model: string): Promise<void> {
