@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { execSync } from 'child_process';
-import semver from 'semver';
+import semver, { prerelease } from 'semver';
 import { createTextGeneration } from './src/util/ai';
 
 // Function to generate changelog from commits using createTextGeneration
@@ -35,12 +35,36 @@ function bumpVersion(increment: semver.ReleaseType): string {
     return newVersion;
 }
 
-// Function to append changelog to CHANGELOG.md
-function updateChangelog(version: string, changelog: string): void {
-    const date = new Date().toISOString().split('T')[0];
-    const changelogContent = `## [${version}] - ${date}\n\n${changelog}\n\n`;
+function createIncrementBadge(increment: semver.ReleaseType): string {
+    // switch statement to return a string for the badge
+    switch (increment) {
+        case 'major':
+            return '![Increment](https://img.shields.io/badge/major-red)';
+        case 'premajor':
+            return '![Increment](https://img.shields.io/badge/premajor-red)';
+        case 'minor':
+            return '![Increment](https://img.shields.io/badge/minor-orange)';
+        case 'preminor':
+            return '![Increment](https://img.shields.io/badge/preminor-orange)';
+        case 'patch':
+            return '![Increment](https://img.shields.io/badge/patch-purple)';
+        case 'prepatch':
+            return '![Increment](https://img.shields.io/badge/prepatch-purple)';
+        case 'prerelease':
+            return '![Increment](https://img.shields.io/badge/prerelease-green)';
+        default:
+            throw new Error('Invalid increment type');
+    }
+}
 
-    fs.appendFileSync('CHANGELOG.md', changelogContent);
+// Function to append changelog to CHANGELOG.md
+function updateChangelog(increment: semver.ReleaseType, version: string, changelog: string): void {
+    const date = new Date().toISOString().split('T')[0];
+
+    const incrementBadge = createIncrementBadge(increment);
+    const changelogContent = `## [${version}] - ${date}\n\n${incrementBadge}\n\n${changelog}\n\n`;
+
+    fs.appendFileSync('CHANGELOG.md', `\n${changelogContent}`);
     console.log(`Changelog updated for version ${version}`);
 }
 
@@ -65,7 +89,7 @@ async function main() {
     const commitMessages = getBranchCommits();
     const changelog = await generateChangelog(commitMessages);
 
-    updateChangelog(newVersion, changelog);
+    updateChangelog(increment, newVersion, changelog);
 
     // Run npm install
     execSync('npm install'); // Update dependencies

@@ -8,3 +8,13 @@
 -   Refactored code for improved readability and error handling.
 -   Utilized temporary files for git commit message construction.
 -   General code prettification and refactoring for better code organization and functionality.
+
+## [0.1.1] - 2024-11-16
+
+![Increment](https://img.shields.io/badge/patch-purple)
+
+### Changelog
+
+-   Enhanced commit workflow:
+    -   Added a feedback loop for improved user interaction.
+    -   Introduced an option to unstage changes.
