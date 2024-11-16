@@ -60,6 +60,7 @@ evergit commit                      # Uses the default model
 ```bash
 evergit commit --model <model-name> # Uses a specific model
 ```
+
 -   `-a, --all`: Stage all modified files for commit.
 
 ```bash
