@@ -55,8 +55,13 @@ evergit commit                      # Uses the default model
 
 ##### Options
 
--   `--model <model-name>`: Use a specific model to generate the commit message.
+-   `-m, --model <model-name>`: Use a specific model to generate the commit message.
 
 ```bash
 evergit commit --model <model-name> # Uses a specific model
+```
+-   `-a, --all`: Stage all modified files for commit.
+
+```bash
+evergit commit --all                # Stages all modified files
 ```
