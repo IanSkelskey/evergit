@@ -9,9 +9,10 @@ import {
     listChangedFiles,
     stageFile,
     commitWithMessage,
+    unstageAllFiles
 } from '../util/git';
 import COMMIT_POLICY from '../util/commit_policy';
-import { selectFilesToStage, confirmCommitMessage, print, requestLaunchpadBugNumber } from '../util/prompt';
+import { selectFilesToStage, confirmCommitMessage, print, requestLaunchpadBugNumber, requestFeedback } from '../util/prompt';
 import { authenticateLaunchpad, loadCredentials, getBugInfo, BugMessage } from '../util/launchpad';
 
 async function commit(model: string): Promise<void> {
@@ -41,11 +42,27 @@ async function commit(model: string): Promise<void> {
 
 async function generateAndProcessCommit(systemPrompt: string, userPrompt: string): Promise<void> {
     const commitMessage = await createTextGeneration(systemPrompt, userPrompt);
-    if (commitMessage) {
-        await processCommitMessage(commitMessage);
-    } else {
+    if (!commitMessage) {
         print('error', 'Failed to generate commit message.');
+        return;
     }
+    var confirmed = await confirmCommitMessage(commitMessage);
+    while (!confirmed) {
+        const feedback = await requestFeedback();
+        if (feedback === '') {
+            unstageAllFiles();
+            print('warning', 'Commit aborted. Staged files have been unstaged.');
+            return;
+        }
+        const newUserPrompt = `${userPrompt}\n\nCommit message draft:\n\n${commitMessage}\n\nFeedback:\n${feedback}`;
+        const newMessage = await createTextGeneration(systemPrompt, newUserPrompt);
+        if (!newMessage) {
+            print('error', 'Failed to generate new commit message.');
+            return;
+        }
+        confirmed = await confirmCommitMessage(newMessage);
+    }
+    commitWithMessage(commitMessage);
 }
 
 async function commitWithoutBugInfo(userInfo: { name: string; email: string; diff: string }): Promise<void> {
@@ -111,17 +128,6 @@ function buildUserPrompt(
     return bugNumber !== ''
         ? `User: ${userInfo.name} <${userInfo.email}>\n\nBug: ${bugNumber}\n\n${messages}\n\n${userInfo.diff}`
         : `User: ${userInfo.name} <${userInfo.email}>\n\n${userInfo.diff}`;
-}
-
-// Helper function to process and confirm the commit message with the user
-async function processCommitMessage(commitMessage: string): Promise<void> {
-    const confirmed = await confirmCommitMessage(commitMessage);
-    if (confirmed) {
-        commitWithMessage(commitMessage);
-        print('success', 'Commit successful.');
-    } else {
-        print('warning', 'Commit aborted.');
-    }
 }
 
 export default commit;
