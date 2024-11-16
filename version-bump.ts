@@ -13,7 +13,7 @@ async function generateChangelog(commitMessages: string[]): Promise<string> {
 function bumpVersion(increment: ReleaseType): string {
     const packageJsonPath = './package.json';
     const readmePath = './README.md';
-    const mainFilePath = './src/main.ts';  // Define path to main.ts
+    const mainFilePath = './src/main.ts'; // Define path to main.ts
 
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     const currentVersion = packageJson.version;
@@ -27,7 +27,7 @@ function bumpVersion(increment: ReleaseType): string {
     const readmeContent = fs.readFileSync(readmePath, 'utf8');
     const updatedReadmeContent = readmeContent.replace(
         /!\[Version\]\(https:\/\/img\.shields\.io\/badge\/version-[\d.]+-blue\)/,
-        `![Version](https://img.shields.io/badge/version-${newVersion}-blue)`
+        `![Version](https://img.shields.io/badge/version-${newVersion}-blue)`,
     );
     fs.writeFileSync(readmePath, updatedReadmeContent);
     console.log(`README.md updated with new version badge ${newVersion}`);
@@ -36,7 +36,7 @@ function bumpVersion(increment: ReleaseType): string {
     const mainFileContent = fs.readFileSync(mainFilePath, 'utf8');
     const updatedMainFileContent = mainFileContent.replace(
         /(program\.name\('evergit'\)\.description\('Automate your Evergreen ILS git workflow'\)\.version\(')([\d.]+)('\);)/,
-        `$1${newVersion}$3`
+        `$1${newVersion}$3`,
     );
     fs.writeFileSync(mainFilePath, updatedMainFileContent);
     console.log(`src/main.ts updated to new version ${newVersion}`);
@@ -46,14 +46,22 @@ function bumpVersion(increment: ReleaseType): string {
 
 function createIncrementBadge(increment: ReleaseType): string {
     switch (increment) {
-        case 'major': return '![Increment](https://img.shields.io/badge/major-red)';
-        case 'premajor': return '![Increment](https://img.shields.io/badge/premajor-red)';
-        case 'minor': return '![Increment](https://img.shields.io/badge/minor-orange)';
-        case 'preminor': return '![Increment](https://img.shields.io/badge/preminor-orange)';
-        case 'patch': return '![Increment](https://img.shields.io/badge/patch-purple)';
-        case 'prepatch': return '![Increment](https://img.shields.io/badge/prepatch-purple)';
-        case 'prerelease': return '![Increment](https://img.shields.io/badge/prerelease-green)';
-        default: throw new Error('Invalid increment type');
+        case 'major':
+            return '![Increment](https://img.shields.io/badge/major-red)';
+        case 'premajor':
+            return '![Increment](https://img.shields.io/badge/premajor-red)';
+        case 'minor':
+            return '![Increment](https://img.shields.io/badge/minor-orange)';
+        case 'preminor':
+            return '![Increment](https://img.shields.io/badge/preminor-orange)';
+        case 'patch':
+            return '![Increment](https://img.shields.io/badge/patch-purple)';
+        case 'prepatch':
+            return '![Increment](https://img.shields.io/badge/prepatch-purple)';
+        case 'prerelease':
+            return '![Increment](https://img.shields.io/badge/prerelease-green)';
+        default:
+            throw new Error('Invalid increment type');
     }
 }
 
