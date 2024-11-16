@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-export enum GitFileStatus {
+enum GitFileStatus {
     'A' = 'Added',
     'M' = 'Modified',
     'D' = 'Deleted',
@@ -118,7 +118,7 @@ export function commitWithMessage(message: string): void {
     fs.unlinkSync(tempFilePath); // Clean up the temporary file
 }
 
-export function sanitizeCommitMessage(message: string): string {
+function sanitizeCommitMessage(message: string): string {
     return message.replace(/"/g, '\\"');
 }
 
