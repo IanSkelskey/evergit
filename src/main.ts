@@ -11,9 +11,10 @@ function main(): void {
     program
         .command('commit')
         .description('Run the evergreen commit workflow. Requires a OPENAI_API_KEY environment variable to be set.')
-        .option('-m <model>', 'Set the OpenAI model to use', 'gpt-4o')
+        .option('-m, --model <model>', 'Set the OpenAI model to use', 'gpt-4o')
+        .option('-a, --addAll', 'Add all files to the commit')
         .action(async (options) => {
-            await commit(options.model);
+            await commit(options.model, options.addAll);
         });
 
     program.parse(process.argv);

@@ -10,6 +10,7 @@ import {
     stageFile,
     commitWithMessage,
     unstageAllFiles,
+    stageAllFiles,
 } from '../util/git';
 import COMMIT_POLICY from '../util/commit_policy';
 import {
@@ -21,7 +22,7 @@ import {
 } from '../util/prompt';
 import { authenticateLaunchpad, loadCredentials, getBugInfo, BugMessage } from '../util/launchpad';
 
-async function commit(model: string): Promise<void> {
+async function commit(model: string, addAllChanges: boolean = false): Promise<void> {
     if (model) {
         setModel(model);
     }
@@ -30,8 +31,12 @@ async function commit(model: string): Promise<void> {
         return;
     }
 
-    const filesToStage = await getStagedFiles();
-    filesToStage.forEach(stageFile);
+    if (addAllChanges) {
+        stageAllFiles();
+    } else {
+        const filesToStage = await getStagedFiles();
+        filesToStage.forEach(stageFile);
+    }
 
     const branch = getCurrentBranchName();
     print('info', `Committing changes to branch ${branch}`);

@@ -38,7 +38,7 @@ export function setupUpstreamBranch(): void {
     execSync(`git push --set-upstream origin ${branchName}`);
 }
 
-export function addAllChanges(): void {
+export function stageAllFiles(): void {
     execSync('git add .');
 }
 
