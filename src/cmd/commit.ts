@@ -74,6 +74,7 @@ async function generateAndProcessCommit(systemPrompt: string, userPrompt: string
         confirmed = await confirmCommitMessage(newMessage);
     }
     commitWithMessage(commitMessage);
+    print('success', 'Changes committed successfully.');
 }
 
 async function commitWithoutBugInfo(userInfo: { name: string; email: string; diff: string }): Promise<void> {
