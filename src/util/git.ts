@@ -70,18 +70,15 @@ export function getStatusForFile(filePath: string): GitFileStatus {
     return status.charAt(0) as GitFileStatus;
 }
 
-export function getDiffForAll(): string {
-    return execSync('git diff').toString();
-}
-
 export function getDiffForStagedFiles(): string {
     var diff: string = execSync('git diff --staged').toString();
-    // if the file is package-lock.json, remove that file from the diff
-    if (diff.includes('diff --git a/package-lock.json b/package-lock.json')) {
-        const regex = /diff --git a\/package-lock.json b\/package-lock.json[\s\S]*?(?=diff --git|$)/g;
-        diff = diff.replace(regex, '');
-    }
+    diff = removeDiffForFile(diff, 'package-lock.json');
     return diff;
+}
+
+function removeDiffForFile(diff: string, filePath: string): string {
+    const regex = new RegExp(`diff --git a/${filePath} b/${filePath}[\\s\\S]*?(?=diff --git|$)`, 'g');
+    return diff.replace(regex, '');
 }
 
 export function getCurrentBranchName(): string {
