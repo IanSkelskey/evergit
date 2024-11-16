@@ -15,7 +15,6 @@
 
 ### Changelog
 
-- Enhanced commit workflow:
-  - Added a feedback loop for improved user interaction.
-  - Introduced an option to unstage changes.
-
+-   Enhanced commit workflow:
+    -   Added a feedback loop for improved user interaction.
+    -   Introduced an option to unstage changes.
