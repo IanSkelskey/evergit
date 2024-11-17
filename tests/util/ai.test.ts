@@ -1,17 +1,35 @@
 import { createTextGeneration, setModel, getModel, validateModelName, listModelNames } from '../../src/util/ai';
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+// Mock `print` function from the prompt module and directly handle console.error and console.warn
+jest.mock('../../src/util/prompt', () => ({
+    print: (type: string, message: string) => {
+        if (type === 'error') {
+            // Suppress console.error output
+            jest.fn();
+        } else if (type === 'warn') {
+            // Suppress console.warn output if necessary
+            jest.fn();
+        } else {
+            console.log(message); // Allow console.log for non-error types
+        }
+    },
+}));
 
 describe('AI Utility Integration Tests', () => {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
     beforeAll(() => {
-        // Ensure API key is present for the test to run
         if (!OPENAI_API_KEY) {
             throw new Error('OPENAI_API_KEY is not set in environment variables.');
         }
-        setModel('gpt-4'); // or set your desired model version
+        setModel('gpt-4');
     });
 
     beforeEach(() => {
+        process.env.OPENAI_API_KEY = OPENAI_API_KEY;
+    });
+
+    afterAll(() => {
         process.env.OPENAI_API_KEY = OPENAI_API_KEY;
     });
 
