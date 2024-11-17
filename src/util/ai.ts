@@ -17,7 +17,11 @@ export async function setModel(modelName: string): Promise<void> {
     MODEL = modelName;
 }
 
-async function validateModelName(modelName: string): Promise<boolean> {
+export function getModel(): string {
+    return MODEL;
+}
+
+export async function validateModelName(modelName: string): Promise<boolean> {
     try {
         await client.models.retrieve(modelName);
         return true;
@@ -26,7 +30,7 @@ async function validateModelName(modelName: string): Promise<boolean> {
     }
 }
 
-async function listModelNames(): Promise<string[]> {
+export async function listModelNames(): Promise<string[]> {
     try {
         const models = await client.models.list();
         const modelIds = models.data.map((model) => model.id);
