@@ -83,7 +83,7 @@ jobs:
                   if [ "$CURRENT_VERSION" == "$BASE_VERSION" ]; then
                     echo "Error: Version number has not been increased."
                     exit 1
-                  elif ! npx semver -r '>' $CURRENT_VERSION $BASE_VERSION; then
+                  elif ! npx semver $CURRENT_VERSION -g $BASE_VERSION; then
                     echo "Error: Version number is not greater than the base branch."
                     exit 1
                   else
