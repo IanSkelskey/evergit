@@ -24,7 +24,12 @@ import { authenticateLaunchpad, loadCredentials, getBugInfo, BugMessage } from '
 
 async function commit(model: string, addAllChanges: boolean = false): Promise<void> {
     if (model) {
-        setModel(model);
+        try {
+            await setModel(model);
+        } catch (error) {
+            print('error', (error as Error).message);
+            return;
+        }
     }
 
     if (!validateWorkingDirectory()) {
