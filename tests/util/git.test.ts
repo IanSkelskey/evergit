@@ -27,7 +27,7 @@ describe('Git Utilities Integration Tests', () => {
             stageAllFiles();
             commitWithMessage('Initial commit');
         } catch (error) {
-            console.error("Failed to initialize Git repository for tests.");
+            console.error('Failed to initialize Git repository for tests.');
         }
     });
 
