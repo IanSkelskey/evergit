@@ -1,6 +1,6 @@
 # EverGit
 
-![Version](https://img.shields.io/badge/version-0.1.1-blue)
+![Version](https://img.shields.io/badge/version-0.1.2-blue)
 
 ![TypeScript](https://img.shields.io/badge/typescript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-00A79D?style=for-the-badge&logo=openai&logoColor=white)
@@ -26,6 +26,8 @@ An AI-powered Git helper for the Evergreen ILS project. Evergit uses OpenAI’s 
 
 ## Installation
 
+Install `evergit` globally using npm:
+
 ```bash
 npm install -g evergit
 ```
@@ -45,7 +47,7 @@ evergit
 Generates a commit message using a LLM model from OpenAI that follows the Evergreen ILS commit message format.
 
 ```bash
-evergit commit                      # Uses the default model
+evergit commit  # Uses the default model and prompts the user to select files to stage
 ```
 
 -   Prompts the user to select files to stage.
@@ -55,8 +57,14 @@ evergit commit                      # Uses the default model
 
 ##### Options
 
--   `--model <model-name>`: Use a specific model to generate the commit message.
+-   `-m, --model <model-name>`: Use a specific model to generate the commit message.
 
-```bash
-evergit commit --model <model-name> # Uses a specific model
-```
+    ```bash
+    evergit commit --model <model-name> # Uses a specific model
+    ```
+
+-   `-a, --all`: Stage all modified files for commit.
+
+    ```bash
+    evergit commit --all    # Stages all modified files
+    ```

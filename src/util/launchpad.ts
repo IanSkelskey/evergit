@@ -254,4 +254,4 @@ class BugMessage {
     }
 }
 
-export { authenticateLaunchpad, loadCredentials, getBugInfo, Bug, BugMessage };
+export { authenticateLaunchpad, loadCredentials, getBugInfo, BugMessage };
