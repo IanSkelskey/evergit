@@ -1,3 +1,7 @@
+# EverGit Changelog
+
+This file is written automatically by the [version bump script](version-bump.ts) and powered by OpenAI's `gpt-4o` model. The script generates a changelog entry based on the commit messages since the last release. The changelog is then updated with the new entry and the version number is bumped accordingly.
+
 ## [0.1.0] - 2024-11-15
 
 ## Changelog Summary
