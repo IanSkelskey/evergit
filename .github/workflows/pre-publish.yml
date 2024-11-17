@@ -25,7 +25,7 @@ jobs:
 
     test:
         runs-on: ubuntu-latest
-
+        needs: prettier-check
         steps:
             - name: Checkout code
               uses: actions/checkout@v2
@@ -39,9 +39,9 @@ jobs:
               run: npm install
 
             - name: Set environment variables
-              run: echo "Setting environment variables"
               env:
                   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+              run: echo "Environment variables set."
 
             - name: Run tests
               run: npm test
@@ -70,6 +70,27 @@ jobs:
 
             - name: Install dependencies
               run: npm install
+
+            - name: Check version bump
+              env:
+                  BASE_BRANCH: main
+              run: |
+                  git fetch origin $BASE_BRANCH
+                  BASE_VERSION=$(git show origin/$BASE_BRANCH:package.json | jq -r '.version')
+                  CURRENT_VERSION=$(jq -r '.version' package.json)
+
+                  echo "Base branch version: $BASE_VERSION"
+                  echo "Current branch version: $CURRENT_VERSION"
+
+                  if [ "$CURRENT_VERSION" == "$BASE_VERSION" ]; then
+                    echo "Error: Version number has not been increased."
+                    exit 1
+                  elif ! npx semver -r '>' $CURRENT_VERSION $BASE_VERSION; then
+                    echo "Error: Version number is not greater than the base branch."
+                    exit 1
+                  else
+                    echo "Version check passed."
+                  fi
 
             - name: Run build
               run: npm run build

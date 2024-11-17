@@ -30,28 +30,33 @@ This file is written automatically by the [version bump script](version-bump.ts)
 ### Changelog Summary
 
 #### New Features
-- Added test job to GitHub Actions workflow.
-- Enhanced CLI options and updated version handling in evergit.
+
+-   Added test job to GitHub Actions workflow.
+-   Enhanced CLI options and updated version handling in evergit.
 
 #### Improvements
-- Added code coverage reports and refactored tests
-- Implemented error handling for model settings with a list of available models
-- Updated README with npm install and usage instructions.
-- Added changelog generation details to the `CHANGELOG.md`.
-- Introduced option for staging all files during commit.
-- Added `ts-prune` to check for unused exports.
+
+-   Added code coverage reports and refactored tests
+-   Implemented error handling for model settings with a list of available models
+-   Updated README with npm install and usage instructions.
+-   Added changelog generation details to the `CHANGELOG.md`.
+-   Introduced option for staging all files during commit.
+-   Added `ts-prune` to check for unused exports.
 
 #### Refactoring
-- Refactored diff retrieval to exclude specific files.
+
+-   Refactored diff retrieval to exclude specific files.
 
 #### Code Quality
-- Prettified code in multiple instances.
+
+-   Prettified code in multiple instances.
 
 #### Maintenance
-- Added `.VSCodeCounter/` to `.gitignore` for a cleaner repository.
-- Removed generated coverage files from the repository and updated `.gitignore` accordingly.
-- Cleaned up coverage files and ignored them in future commits.
+
+-   Added `.VSCodeCounter/` to `.gitignore` for a cleaner repository.
+-   Removed generated coverage files from the repository and updated `.gitignore` accordingly.
+-   Cleaned up coverage files and ignored them in future commits.
 
 #### Fixes
-- Added a success message after the commit operation is performed.
 
+-   Added a success message after the commit operation is performed.
