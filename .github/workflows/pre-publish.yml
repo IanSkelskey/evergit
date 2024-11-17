@@ -23,6 +23,39 @@ jobs:
             - name: Run Prettier check
               run: npm run format-check
 
+    test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v2
+              with:
+                  node-version: '20'
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Set environment variables
+              run: echo "Setting environment variables"
+              env:
+                  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+            - name: Run tests
+              run: npm test
+
+            - name: Generate coverage report
+              run: npm test -- --coverage
+
+            - name: Upload coverage report
+              if: success()
+              uses: actions/upload-artifact@v2
+              with:
+                  name: coverage-report
+                  path: coverage/lcov-report
+
     build:
         runs-on: ubuntu-latest
         needs: prettier-check
