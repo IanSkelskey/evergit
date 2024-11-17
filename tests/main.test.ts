@@ -36,7 +36,9 @@ describe('Main CLI', () => {
 
     test('should show help when no arguments are passed', async () => {
         // Mock `program.outputHelp` directly
-        const outputHelpSpy = jest.spyOn(require('commander').Command.prototype, 'outputHelp').mockImplementation(() => {});
+        const outputHelpSpy = jest
+            .spyOn(require('commander').Command.prototype, 'outputHelp')
+            .mockImplementation(() => {});
 
         process.argv = ['node', 'main.js'];
         try {
