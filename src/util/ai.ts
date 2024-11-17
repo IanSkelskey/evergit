@@ -5,7 +5,7 @@ let MODEL = 'gpt-4o';
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function setModel(modelName: string): Promise<void> {
-    if (!await validateModelName(modelName)) {
+    if (!(await validateModelName(modelName))) {
         const modelNames = await listModelNames();
         // Join model names in a string with 4 per line and comma separated
         const availableModels = modelNames.reduce((acc, name, index) => {
@@ -39,7 +39,6 @@ export async function listModelNames(): Promise<string[]> {
         throw new Error(`Error fetching model names: ${(error as Error).message}`);
     }
 }
-
 
 export async function createTextGeneration(system_prompt: string, user_prompt: string): Promise<string | null> {
     if (!process.env.OPENAI_API_KEY) {
