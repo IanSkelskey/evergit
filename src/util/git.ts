@@ -71,9 +71,20 @@ export function getStatusForFile(filePath: string): GitFileStatus {
 }
 
 export function getDiffForStagedFiles(): string {
-    var diff: string = execSync('git diff --staged').toString();
-    diff = removeDiffForFile(diff, 'package-lock.json');
-    return diff;
+    const maxBufferSize = 10 * 1024 * 1024; // 10 MB buffer
+    try {
+        let diff: string = execSync('git diff --staged', { maxBuffer: maxBufferSize }).toString();
+        diff = removeDiffForFile(diff, 'package-lock.json');
+        return diff;
+    } catch (error: any) {
+        if (error.code === 'ENOBUFS') {
+            throw new Error(
+                'Buffer overflow: The diff output exceeds the buffer limit. Consider reducing the number of staged files or increasing the buffer size.',
+            );
+        } else {
+            throw error; // Re-throw other errors if they are not ENOBUFS
+        }
+    }
 }
 
 function removeDiffForFile(diff: string, filePath: string): string {
