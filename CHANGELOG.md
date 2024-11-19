@@ -60,3 +60,25 @@ This file is written automatically by the [version bump script](version-bump.ts)
 #### Fixes
 
 -   Added a success message after the commit operation is performed.
+
+## [0.1.3] - 2024-11-19
+
+![Increment](https://img.shields.io/badge/patch-purple)
+
+### Changelog Summary
+
+-   **Enhancements:**
+
+    -   Improved buffer handling in the `getDiffForStagedFiles` function.
+    -   Enhanced the CLI main function and added corresponding tests.
+
+-   **Testing:**
+
+    -   Added integration tests for Git utilities.
+
+-   **Code Quality:**
+
+    -   Prettified codebase for improved readability.
+
+-   **Merges:**
+    -   Merged branch 'dev' from the repository.

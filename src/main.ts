@@ -5,8 +5,8 @@ import commit from './cmd/commit';
 
 const program = new Command();
 
-function main(): void {
-    program.name('evergit').description('Automate your Evergreen ILS git workflow').version('0.1.2');
+export async function main(args = process.argv): Promise<void> {
+    program.name('evergit').description('Automate your Evergreen ILS git workflow').version('0.1.3');
 
     program
         .command('commit')
@@ -17,11 +17,13 @@ function main(): void {
             await commit(options.model, options.all);
         });
 
-    program.parse(process.argv);
+    program.parse(args);
 
-    if (!process.argv.slice(2).length) {
+    if (!args.slice(2).length) {
         program.outputHelp();
     }
 }
 
-main();
+if (require.main === module) {
+    main();
+}

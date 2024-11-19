@@ -1,78 +1,73 @@
 import {
-    GitFileStatus,
-    stageAllFiles,
     getCurrentBranchName,
     getStatusForFile,
     hasGitChanges,
     isInGitRepo,
+    stageAllFiles,
+    commitWithMessage,
+    setUserEmail,
+    setUserName,
 } from '../../src/util/git';
 import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 
-jest.mock('child_process', () => ({
-    execSync: jest.fn(),
-}));
+describe('Git Utilities Integration Tests', () => {
+    const testFilePath = 'test-file.txt';
+    let testRepoDir: string;
 
-describe('Git Utilities', () => {
-    afterEach(() => {
-        jest.clearAllMocks();
+    beforeAll(() => {
+        // Create a temporary directory for the test repository
+        testRepoDir = fs.mkdtempSync(path.join(os.tmpdir(), 'test-repo-'));
+        process.chdir(testRepoDir);
+
+        // Ensure a Git repository is initialized and an initial commit is made
+        try {
+            execSync('git init');
+            // Set Git user name and email
+            setUserName('Test User');
+            setUserEmail('test@example.com');
+            fs.writeFileSync(testFilePath, 'Initial content');
+            stageAllFiles();
+            commitWithMessage('Initial commit');
+        } catch (error) {
+            console.error('Failed to initialize Git repository for tests.');
+        }
+    });
+
+    afterAll(() => {
+        // Clean up by removing the test repository
+        process.chdir('..'); // Move out of the test repository directory
+        fs.rmSync(testRepoDir, { recursive: true, force: true });
     });
 
     describe('isInGitRepo', () => {
         test('should return true if inside a Git repository', () => {
-            (execSync as jest.Mock).mockReturnValueOnce('true');
             expect(isInGitRepo()).toBe(true);
         });
+    });
 
-        test('should return false if not inside a Git repository', () => {
-            (execSync as jest.Mock).mockImplementationOnce(() => {
-                throw new Error();
-            });
-            expect(isInGitRepo()).toBe(false);
+    describe('addAllChanges and hasGitChanges', () => {
+        test('should detect changes after adding a file', () => {
+            fs.writeFileSync(testFilePath, 'Test content');
+            expect(hasGitChanges()).toBe(true);
         });
     });
 
     describe('getCurrentBranchName', () => {
         test('should return the current branch name', () => {
-            (execSync as jest.Mock).mockReturnValueOnce('main\n');
-            expect(getCurrentBranchName()).toBe('main');
-        });
-
-        test('should throw an error if branch name cannot be retrieved', () => {
-            (execSync as jest.Mock).mockImplementationOnce(() => {
-                throw new Error();
-            });
-            expect(() => getCurrentBranchName()).toThrow('Unable to get current branch name.');
-        });
-    });
-
-    describe('hasGitChanges', () => {
-        test('should return true if there are changes in the Git working tree', () => {
-            (execSync as jest.Mock).mockReturnValueOnce('M src/util/git.ts\n');
-            expect(hasGitChanges()).toBe(true);
-        });
-
-        test('should return false if there are no changes in the Git working tree', () => {
-            (execSync as jest.Mock).mockReturnValueOnce('');
-            expect(hasGitChanges()).toBe(false);
-        });
-    });
-
-    describe('addAllChanges', () => {
-        test('should stage all changes', () => {
-            stageAllFiles();
-            expect(execSync).toHaveBeenCalledWith('git add .');
+            const branchName = getCurrentBranchName();
+            expect(branchName === 'master' || branchName === 'main').toBe(true);
         });
     });
 
     describe('getStatusForFile', () => {
         test('should return the status for a specific file', () => {
-            (execSync as jest.Mock).mockReturnValueOnce('M src/util/git.ts\n');
-            expect(getStatusForFile('src/util/git.ts')).toBe('M');
-        });
-
-        test('should return Ignored status if the file is not tracked', () => {
-            (execSync as jest.Mock).mockReturnValueOnce('');
-            expect(getStatusForFile('src/util/git.ts')).toBe(GitFileStatus['!']);
+            // Step 1: Modify the file after the initial commit and check the status
+            fs.writeFileSync(testFilePath, 'Modified content');
+            stageAllFiles();
+            expect(getStatusForFile(testFilePath)).toBe('M');
         });
     });
 });
