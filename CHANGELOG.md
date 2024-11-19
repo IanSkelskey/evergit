@@ -67,16 +67,18 @@ This file is written automatically by the [version bump script](version-bump.ts)
 
 ### Changelog Summary
 
-- **Enhancements:**
-  - Improved buffer handling in the `getDiffForStagedFiles` function.
-  - Enhanced the CLI main function and added corresponding tests.
+-   **Enhancements:**
 
-- **Testing:**
-  - Added integration tests for Git utilities.
+    -   Improved buffer handling in the `getDiffForStagedFiles` function.
+    -   Enhanced the CLI main function and added corresponding tests.
 
-- **Code Quality:**
-  - Prettified codebase for improved readability.
+-   **Testing:**
 
-- **Merges:**
-  - Merged branch 'dev' from the repository.
+    -   Added integration tests for Git utilities.
 
+-   **Code Quality:**
+
+    -   Prettified codebase for improved readability.
+
+-   **Merges:**
+    -   Merged branch 'dev' from the repository.
