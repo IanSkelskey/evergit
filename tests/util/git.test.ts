@@ -5,6 +5,8 @@ import {
     isInGitRepo,
     stageAllFiles,
     commitWithMessage,
+    setUserEmail,
+    setUserName,
 } from '../../src/util/git';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
@@ -23,6 +25,9 @@ describe('Git Utilities Integration Tests', () => {
         // Ensure a Git repository is initialized and an initial commit is made
         try {
             execSync('git init');
+            // Set Git user name and email
+            setUserName('Test User');
+            setUserEmail('test@example.com');
             fs.writeFileSync(testFilePath, 'Initial content');
             stageAllFiles();
             commitWithMessage('Initial commit');

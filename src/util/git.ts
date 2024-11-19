@@ -33,6 +33,14 @@ export function pushChanges(): void {
     }
 }
 
+export function setUserName(name: string): void {
+    execSync(`git config user.name "${name}"`);
+}
+
+export function setUserEmail(email: string): void {
+    execSync(`git config user.email "${email}"`);
+}
+
 export function setupUpstreamBranch(): void {
     const branchName = getCurrentBranchName();
     execSync(`git push --set-upstream origin ${branchName}`);
