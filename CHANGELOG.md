@@ -92,4 +92,3 @@ This file is written automatically by the [version bump script](version-bump.ts)
 - Refactored AI utility to use Axios instead of OpenAI client.
 - Improved code readability by applying code formatting (Prettified Code).
 - Merged changes from the 'main' branch into 'dev'.
-
