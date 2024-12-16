@@ -82,3 +82,14 @@ This file is written automatically by the [version bump script](version-bump.ts)
 
 - **Merges:**
     - Merged branch 'dev' from the repository.
+
+## [0.1.4] - 2024-12-16
+
+![Increment](https://img.shields.io/badge/patch-purple)
+
+# Changelog Summary
+
+- Refactored AI utility to use Axios instead of OpenAI client.
+- Improved code readability by applying code formatting (Prettified Code).
+- Merged changes from the 'main' branch into 'dev'.
+
