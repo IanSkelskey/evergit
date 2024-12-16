@@ -69,7 +69,7 @@ export async function createTextGeneration(system_prompt: string, user_prompt: s
                     Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
                     'Content-Type': 'application/json',
                 },
-            }
+            },
         );
         const data = response.data as { choices: { message: { content: string } }[] };
         return data.choices[0]?.message?.content?.trim() || null;
