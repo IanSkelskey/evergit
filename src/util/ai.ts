@@ -1,8 +1,7 @@
-import { OpenAI } from 'openai';
+import axios from 'axios';
 import { print } from './prompt';
 
 let MODEL = 'gpt-4o';
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function setModel(modelName: string): Promise<void> {
     if (!(await validateModelName(modelName))) {
@@ -23,8 +22,12 @@ export function getModel(): string {
 
 export async function validateModelName(modelName: string): Promise<boolean> {
     try {
-        await client.models.retrieve(modelName);
-        return true;
+        const response = await axios.get(`https://api.openai.com/v1/models/${modelName}`, {
+            headers: {
+                Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            },
+        });
+        return response.status === 200;
     } catch (error) {
         return false;
     }
@@ -32,9 +35,12 @@ export async function validateModelName(modelName: string): Promise<boolean> {
 
 export async function listModelNames(): Promise<string[]> {
     try {
-        const models = await client.models.list();
-        const modelIds = models.data.map((model) => model.id);
-        return modelIds;
+        const response = await axios.get('https://api.openai.com/v1/models', {
+            headers: {
+                Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            },
+        });
+        return (response.data as { data: { id: string }[] }).data.map((model: any) => model.id);
     } catch (error) {
         throw new Error(`Error fetching model names: ${(error as Error).message}`);
     }
@@ -46,17 +52,27 @@ export async function createTextGeneration(system_prompt: string, user_prompt: s
         return null;
     }
     try {
-        const completion = await client.chat.completions.create({
-            model: MODEL,
-            messages: [
-                {
-                    role: 'system',
-                    content: system_prompt,
+        const response = await axios.post(
+            'https://api.openai.com/v1/chat/completions',
+            {
+                model: MODEL,
+                messages: [
+                    {
+                        role: 'system',
+                        content: system_prompt,
+                    },
+                    { role: 'user', content: user_prompt },
+                ],
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+                    'Content-Type': 'application/json',
                 },
-                { role: 'user', content: user_prompt },
-            ],
-        });
-        return completion.choices[0]?.message?.content?.trim() || null;
+            }
+        );
+        const data = response.data as { choices: { message: { content: string } }[] };
+        return data.choices[0]?.message?.content?.trim() || null;
     } catch (error: any) {
         print('error', `An error occurred while generating text: ${(error as Error).message}`);
         return null;
