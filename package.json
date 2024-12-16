@@ -9,8 +9,8 @@
     "scripts": {
         "start": "node dist/main.js",
         "build": "tsc",
-        "format": "prettier --write .",
-        "format-check": "prettier --check .",
+        "format": "prettier --write . --config .prettierrc",
+        "format-check": "prettier --check . --config .prettierrc",
         "check-unused": "ts-prune -p tsconfig.json",
         "prepare": "npm run build",
         "test": "jest",
