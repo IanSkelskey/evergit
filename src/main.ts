@@ -6,7 +6,7 @@ import commit from './cmd/commit';
 const program = new Command();
 
 export async function main(args = process.argv): Promise<void> {
-    program.name('evergit').description('Automate your Evergreen ILS git workflow').version('0.1.3');
+    program.name('evergit').description('Automate your Evergreen ILS git workflow').version('0.1.4');
 
     program
         .command('commit')
