@@ -17,6 +17,7 @@ An AI-powered Git helper for the Evergreen ILS project. Evergit uses OpenAI’s 
 - Automatically sign off commits with the user's name and email.
 - Select files to stage for commit.
 - Use different models by specifying the model name as an argument.
+- Manage user-specific configuration for name and email.
 
 ## Requirements
 
@@ -35,10 +36,6 @@ npm install -g evergit
 ## Usage
 
 `evergit` needs to be run in a git repository. It will automatically detect the repository and branch you are on. If run without any arguments, it will display the help message.
-
-```bash
-evergit
-```
 
 ## Commands
 
@@ -67,4 +64,43 @@ evergit commit  # Uses the default model and prompts the user to select files to
 
     ```bash
     evergit commit --all    # Stages all modified files
+    ```
+
+#### `evergit config`
+
+Manage user-specific configuration options for name and email. If no name and/or email is set, evergit defaults to using the git configuration.
+
+##### Options
+
+- `--set <key>`: Set a configuration option. Valid keys are `name` and `email`.
+
+    ```bash
+    evergit config --set name "Your Name"
+    evergit config --set email "your.email@example.com"
+    ```
+
+- `--get <key>`: Get a configuration option. Valid keys are `name` and `email`.
+
+    ```bash
+    evergit config --get name
+    evergit config --get email
+    ```
+
+- `--clear <key>`: Clear a configuration option. Valid keys are `name` and `email`.
+
+    ```bash
+    evergit config --clear name
+    evergit config --clear email
+    ```
+
+- `--get-all`: Get the entire configuration.
+
+    ```bash
+    evergit config --get-all
+    ```
+
+- `--edit`: Edit the configuration file manually in the default editor.
+
+    ```bash
+    evergit config --edit
     ```
