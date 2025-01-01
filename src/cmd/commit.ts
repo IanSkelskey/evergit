@@ -4,14 +4,15 @@ import {
     hasGitChanges,
     getCurrentBranchName,
     getDiffForStagedFiles,
-    getName,
-    getEmail,
+    getName as getGitName,
+    getEmail as getGitEmail,
     listChangedFiles,
     stageFile,
     commitWithMessage,
     unstageAllFiles,
     stageAllFiles,
 } from '../util/git';
+import { getConfig } from './config';
 import COMMIT_POLICY from '../util/commit_policy';
 import {
     selectFilesToStage,
@@ -128,9 +129,11 @@ async function getStagedFiles(): Promise<string[]> {
 
 // Helper function to retrieve the user's name and email from Git
 function getUserInfo(): { name: string; email: string; diff: string } {
+    const name = getConfig('name') || getGitName();
+    const email = getConfig('email') || getGitEmail();
     return {
-        name: getName(),
-        email: getEmail(),
+        name,
+        email,
         diff: getDiffForStagedFiles(),
     };
 }
