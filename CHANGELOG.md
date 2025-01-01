@@ -92,3 +92,15 @@ This file is written automatically by the [version bump script](version-bump.ts)
 - Refactored AI utility to use Axios instead of OpenAI client.
 - Improved code readability by applying code formatting (Prettified Code).
 - Merged changes from the 'main' branch into 'dev'.
+
+## [0.2.0] - 2025-01-01
+
+![Increment](https://img.shields.io/badge/minor-orange)
+
+# Changelog Summary
+
+- Added user-specific configuration management to the Evergit tool.
+- Enhanced the configuration management system within Evergit.
+- Removed the `open` package and its type definitions from dependencies.
+- Applied code formatting improvements for better readability.
+
