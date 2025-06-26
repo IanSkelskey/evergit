@@ -30,8 +30,7 @@ export class OllamaProvider implements ModelProvider {
     }
 
     async createCompletion(systemPrompt: string, userPrompt: string, model: string): Promise<string | null> {
-        const endpoint =
-            (this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl) + '/api/chat';
+        const endpoint = (this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl) + '/api/chat';
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
         if (process.env.OLLAMA_API_KEY) {
