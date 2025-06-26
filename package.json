@@ -23,6 +23,7 @@
         "commander": "^9.4.1",
         "inquirer": "^8.0.0",
         "oauth-1.0a": "^2.2.6",
+        "ora": "^5.4.1",
         "readline-sync": "^1.4.10",
         "semver": "^7.6.3"
     },

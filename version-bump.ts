@@ -2,11 +2,14 @@ import fs from 'fs';
 import { execSync } from 'child_process';
 import semver, { ReleaseType } from 'semver';
 import { createTextGeneration } from './src/util/ai';
+import ora from 'ora';
 
 async function generateChangelog(commitMessages: string[]): Promise<string> {
+    const spinner = ora('Generating changelog from commit messages...').start();
     const systemPrompt = 'You are a helpful assistant generating a changelog based on commit messages.';
     const userPrompt = `Create a concise changelog summary for the following commits:\n\n${commitMessages.join('\n')}`;
     const changelog = await createTextGeneration(systemPrompt, userPrompt);
+    spinner.stop();
     return changelog || 'Error generating changelog';
 }
 

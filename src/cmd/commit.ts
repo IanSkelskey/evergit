@@ -22,6 +22,7 @@ import {
     requestFeedback,
 } from '../util/prompt';
 import { authenticateLaunchpad, loadCredentials, getBugInfo, BugMessage } from '../util/launchpad';
+import ora from 'ora';
 
 async function commit(model: string | undefined, addAllChanges: boolean = false, provider?: string): Promise<void> {
     // Initialize from config first
@@ -77,7 +78,10 @@ async function commit(model: string | undefined, addAllChanges: boolean = false,
 }
 
 async function generateAndProcessCommit(systemPrompt: string, userPrompt: string): Promise<void> {
+    const spinner = ora('Generating commit message...').start();
     const commitMessage = await createTextGeneration(systemPrompt, userPrompt);
+    spinner.stop();
+    
     if (!commitMessage) {
         print('error', 'Failed to generate commit message.');
         return;
@@ -90,8 +94,13 @@ async function generateAndProcessCommit(systemPrompt: string, userPrompt: string
             print('warning', 'Commit aborted. Staged files have been unstaged.');
             return;
         }
+        
         const newUserPrompt = `${userPrompt}\n\nCommit message draft:\n\n${commitMessage}\n\nFeedback:\n${feedback}`;
+        spinner.text = 'Regenerating commit message with feedback...';
+        spinner.start();
         const newMessage = await createTextGeneration(systemPrompt, newUserPrompt);
+        spinner.stop();
+        
         if (!newMessage) {
             print('error', 'Failed to generate new commit message.');
             return;

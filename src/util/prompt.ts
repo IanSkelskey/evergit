@@ -1,5 +1,6 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
+import ora, { Ora } from 'ora';
 
 const colors: Record<string, (message: string) => string> = {
     info: chalk.blue,
@@ -129,4 +130,16 @@ export function print(type: string, message: string): void {
     }
 
     console.log(colors[type](message));
+}
+
+/**
+ * Creates and returns a spinner with the given text
+ * @param text The text to display next to the spinner
+ * @returns An ora spinner instance
+ */
+export function createSpinner(text: string): Ora {
+    return ora({
+        text,
+        color: 'blue',
+    });
 }
