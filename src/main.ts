@@ -80,7 +80,7 @@ export async function main(args = process.argv): Promise<void> {
                     try {
                         console.log('Fetching available OpenAI models...');
                         const models = await listModelsForProvider('openai');
-                        const gptModels = models.filter(m => m.startsWith('gpt'));
+                        const gptModels = models.filter((m) => m.startsWith('gpt'));
                         const model = await selectModel(gptModels, 'Select the default OpenAI model:', 'gpt-4o');
                         setConfig('openaiModel', model);
                         console.log(`OpenAI configured with model: ${model}`);
@@ -135,7 +135,7 @@ export async function main(args = process.argv): Promise<void> {
                     try {
                         console.log('Fetching available OpenAI models...');
                         const models = await listModelsForProvider('openai');
-                        const gptModels = models.filter(m => m.startsWith('gpt'));
+                        const gptModels = models.filter((m) => m.startsWith('gpt'));
                         const model = await selectModel(gptModels, 'Select the OpenAI model:');
                         setConfig('openaiModel', model);
                         console.log(`OpenAI model set to: ${model}`);

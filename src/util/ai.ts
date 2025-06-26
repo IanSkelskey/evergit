@@ -282,9 +282,8 @@ export async function listModelNames(): Promise<string[]> {
 }
 
 export async function listModelsForProvider(provider: 'openai' | 'ollama', ollamaUrl?: string): Promise<string[]> {
-    const modelProvider = provider === 'ollama' 
-        ? new OllamaProvider(ollamaUrl || OLLAMA_BASE_URL) 
-        : new OpenAIProvider();
+    const modelProvider =
+        provider === 'ollama' ? new OllamaProvider(ollamaUrl || OLLAMA_BASE_URL) : new OpenAIProvider();
     return modelProvider.listModels();
 }
 
