@@ -3,6 +3,7 @@
 import { Command } from 'commander';
 import commit from './cmd/commit';
 import { setConfig, getConfig, clearConfig, getAllConfig, isValidKey, CONFIG_PATH } from './cmd/config';
+import { selectProvider, promptOllamaSetup } from './util/prompt';
 import inquirer from 'inquirer';
 import { exec } from 'child_process';
 
@@ -25,11 +26,12 @@ export async function main(args = process.argv): Promise<void> {
 
     program
         .command('commit')
-        .description('Run the evergreen commit workflow. Requires a OPENAI_API_KEY environment variable to be set.')
-        .option('-m, --model <model>', 'Set the OpenAI model to use', 'gpt-4o')
+        .description('Run the evergreen commit workflow. Requires API keys to be set.')
+        .option('-m, --model <model>', 'Set the AI model to use')
         .option('-a, --all', 'Add all files to the commit')
+        .option('-p, --provider <provider>', 'Set the AI provider (openai or ollama)')
         .action(async (options) => {
-            await commit(options.model, options.all);
+            await commit(options.model, options.all, options.provider);
         });
 
     program
@@ -40,13 +42,51 @@ export async function main(args = process.argv): Promise<void> {
         .option('--clear <key>', 'Clear a configuration option')
         .option('--get-all', 'Get the entire configuration')
         .option('--edit', 'Edit the configuration file manually')
+        .option('--setup-provider', 'Setup AI provider configuration')
         .action(async (options) => {
+            if (options.setupProvider) {
+                const provider = await selectProvider();
+                setConfig('provider', provider);
+                
+                if (provider === 'ollama') {
+                    const { baseUrl, model } = await promptOllamaSetup();
+                    setConfig('ollamaBaseUrl', baseUrl);
+                    setConfig('ollamaModel', model);
+                    console.log(`Ollama configured with base URL: ${baseUrl} and model: ${model}`);
+                } else {
+                    const { model } = await inquirer.prompt({
+                        type: 'input',
+                        name: 'model',
+                        message: 'Enter the default OpenAI model:',
+                        default: 'gpt-4o',
+                    });
+                    setConfig('openaiModel', model);
+                    console.log(`OpenAI configured with model: ${model}`);
+                }
+                console.log(`Provider set to: ${provider}`);
+                return;
+            }
+            
             if (options.set) {
                 if (!isValidKey(options.set)) {
                     console.log(`Invalid configuration key: ${options.set}`);
-                    console.log(`Valid keys are: name, email`);
+                    console.log(`Valid keys are: name, email, provider, openaiModel, ollamaModel, ollamaBaseUrl`);
                     return;
                 }
+                
+                if (options.set === 'provider') {
+                    const provider = await selectProvider();
+                    setConfig('provider', provider);
+                    console.log(`Provider set to: ${provider}`);
+                    
+                    if (provider === 'ollama' && !getConfig('ollamaBaseUrl')) {
+                        const { baseUrl, model } = await promptOllamaSetup();
+                        setConfig('ollamaBaseUrl', baseUrl);
+                        setConfig('ollamaModel', model);
+                    }
+                    return;
+                }
+                
                 const { value } = await inquirer.prompt({
                     type: 'input',
                     name: 'value',

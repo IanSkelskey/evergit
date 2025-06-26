@@ -81,7 +81,7 @@ export function listChangedFiles(): string[] {
     const statusOutput = execSync(`git -C "${gitRoot}" status --porcelain`).toString().trim();
     return statusOutput
         .split('\n')
-        .map((line) => line.trim().slice(2))
+        .map((line) => line.trim().slice(2).trim())
         .filter(Boolean);
 }
 
