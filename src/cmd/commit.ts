@@ -131,6 +131,27 @@ async function getStagedFiles(): Promise<string[]> {
 function getUserInfo(): { name: string; email: string; diff: string } {
     const name = getConfig('name') || getGitName();
     const email = getConfig('email') || getGitEmail();
+
+    if (!name || !email) {
+        const missingFields = [];
+        if (!name) missingFields.push('name');
+        if (!email) missingFields.push('email');
+
+        print('error', `Git user ${missingFields.join(' and ')} not configured.`);
+        print('info', 'Please configure git or evergit:');
+        if (!name) {
+            print('info', '  git config --global user.name "Your Name"');
+            print('info', '  OR');
+            print('info', '  evergit config set name "Your Name"');
+        }
+        if (!email) {
+            print('info', '  git config --global user.email "your.email@example.com"');
+            print('info', '  OR');
+            print('info', '  evergit config set email "your.email@example.com"');
+        }
+        throw new Error('Missing git configuration');
+    }
+
     return {
         name,
         email,

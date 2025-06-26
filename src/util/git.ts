@@ -14,6 +14,14 @@ export enum GitFileStatus {
     '!' = 'Ignored',
 }
 
+export function getGitRootDir(): string {
+    try {
+        return execSync('git rev-parse --show-toplevel', { encoding: 'utf-8' }).trim();
+    } catch (error) {
+        throw new Error('Unable to determine git repository root directory.');
+    }
+}
+
 export function isInGitRepo(): boolean {
     try {
         execSync('git rev-parse --is-inside-work-tree', { stdio: 'ignore' });
@@ -25,7 +33,8 @@ export function isInGitRepo(): boolean {
 
 export function pushChanges(): void {
     try {
-        execSync('git push');
+        const gitRoot = getGitRootDir();
+        execSync(`git -C "${gitRoot}" push`);
     } catch (error: any) {
         if (error.message.includes('fatal: The current branch')) {
             throw new Error('The current branch has no upstream branch.');
@@ -43,27 +52,33 @@ export function setUserEmail(email: string): void {
 
 export function setupUpstreamBranch(): void {
     const branchName = getCurrentBranchName();
-    execSync(`git push --set-upstream origin ${branchName}`);
+    const gitRoot = getGitRootDir();
+    execSync(`git -C "${gitRoot}" push --set-upstream origin ${branchName}`);
 }
 
 export function stageAllFiles(): void {
-    execSync('git add .');
+    const gitRoot = getGitRootDir();
+    execSync(`git -C "${gitRoot}" add .`);
 }
 
 export function stageFile(filePath: string): void {
-    execSync(`git add ${filePath}`);
+    const gitRoot = getGitRootDir();
+    execSync(`git -C "${gitRoot}" add "${filePath}"`);
 }
 
 export function unstageFile(filePath: string): void {
-    execSync(`git restore --staged ${filePath}`);
+    const gitRoot = getGitRootDir();
+    execSync(`git -C "${gitRoot}" restore --staged "${filePath}"`);
 }
 
 export function unstageAllFiles(): void {
-    execSync('git restore --staged .');
+    const gitRoot = getGitRootDir();
+    execSync(`git -C "${gitRoot}" restore --staged .`);
 }
 
 export function listChangedFiles(): string[] {
-    const statusOutput = execSync('git status --porcelain').toString().trim();
+    const gitRoot = getGitRootDir();
+    const statusOutput = execSync(`git -C "${gitRoot}" status --porcelain`).toString().trim();
     return statusOutput
         .split('\n')
         .map((line) => line.trim().slice(2))
@@ -71,7 +86,8 @@ export function listChangedFiles(): string[] {
 }
 
 export function getStatusForFile(filePath: string): GitFileStatus {
-    const status = execSync(`git status --porcelain "${filePath}"`).toString().trim();
+    const gitRoot = getGitRootDir();
+    const status = execSync(`git -C "${gitRoot}" status --porcelain "${filePath}"`).toString().trim();
     if (!status) {
         return GitFileStatus['!'];
     }
@@ -81,7 +97,8 @@ export function getStatusForFile(filePath: string): GitFileStatus {
 export function getDiffForStagedFiles(): string {
     const maxBufferSize = 10 * 1024 * 1024; // 10 MB buffer
     try {
-        let diff: string = execSync('git diff --staged', { maxBuffer: maxBufferSize }).toString();
+        const gitRoot = getGitRootDir();
+        let diff: string = execSync(`git -C "${gitRoot}" diff --staged`, { maxBuffer: maxBufferSize }).toString();
         diff = removeDiffForFile(diff, 'package-lock.json');
         return diff;
     } catch (error: any) {
@@ -102,35 +119,78 @@ function removeDiffForFile(diff: string, filePath: string): string {
 
 export function getCurrentBranchName(): string {
     try {
-        const branchName = execSync('git rev-parse --abbrev-ref HEAD', {
-            encoding: 'utf-8',
-        }).trim();
+        const gitRoot = getGitRootDir();
 
-        return branchName;
+        // First try the standard approach
+        try {
+            const branchName = execSync(`git -C "${gitRoot}" rev-parse --abbrev-ref HEAD`, {
+                encoding: 'utf-8',
+                stdio: ['pipe', 'pipe', 'pipe'], // Capture stderr
+            }).trim();
+
+            if (branchName === 'HEAD') {
+                // We're in a detached HEAD state
+                throw new Error('Repository is in detached HEAD state. Please checkout a branch.');
+            }
+
+            return branchName;
+        } catch (error: any) {
+            // If rev-parse fails, try symbolic-ref for new repos
+            if (error.message?.includes('ambiguous argument') || error.message?.includes('unknown revision')) {
+                try {
+                    const branchName = execSync(`git -C "${gitRoot}" symbolic-ref --short HEAD`, {
+                        encoding: 'utf-8',
+                    }).trim();
+                    return branchName;
+                } catch {
+                    // If symbolic-ref also fails, we might be in a completely new repo
+                    // Try to get the default branch name from config
+                    try {
+                        const defaultBranch = execSync(`git -C "${gitRoot}" config init.defaultBranch`, {
+                            encoding: 'utf-8',
+                        }).trim();
+                        return defaultBranch || 'main'; // Default to 'main' if not configured
+                    } catch {
+                        return 'main'; // Final fallback
+                    }
+                }
+            }
+            throw error;
+        }
     } catch (error) {
         throw new Error('Unable to get current branch name.');
     }
 }
 
 export function hasGitChanges(): boolean {
-    const status = execSync('git status --porcelain').toString().trim();
+    const gitRoot = getGitRootDir();
+    const status = execSync(`git -C "${gitRoot}" status --porcelain`).toString().trim();
     return status.length > 0;
 }
 
 export function getName(): string {
-    return execSync('git config user.name').toString().trim();
+    try {
+        return execSync('git config user.name', { encoding: 'utf-8' }).trim();
+    } catch {
+        return '';
+    }
 }
 
 export function getEmail(): string {
-    return execSync('git config user.email').toString().trim();
+    try {
+        return execSync('git config user.email', { encoding: 'utf-8' }).trim();
+    } catch {
+        return '';
+    }
 }
 
 export function commitWithMessage(message: string): void {
+    const gitRoot = getGitRootDir();
     const sanitizedMessage = sanitizeCommitMessage(message);
     const tempFilePath = path.join(os.tmpdir(), 'commit-message.txt');
 
     fs.writeFileSync(tempFilePath, sanitizedMessage);
-    execSync(`git commit -F "${tempFilePath}"`);
+    execSync(`git -C "${gitRoot}" commit -F "${tempFilePath}"`);
     fs.unlinkSync(tempFilePath); // Clean up the temporary file
 }
 
@@ -139,12 +199,14 @@ function sanitizeCommitMessage(message: string): string {
 }
 
 export function checkForRemote(remoteUrl: string): boolean {
-    const remoteUrls = execSync('git remote -v').toString();
+    const gitRoot = getGitRootDir();
+    const remoteUrls = execSync(`git -C "${gitRoot}" remote -v`).toString();
     return remoteUrls.includes(remoteUrl);
 }
 
 export function getRemoteName(remoteUrl: string): string {
-    const remoteUrls = execSync('git remote -v').toString();
+    const gitRoot = getGitRootDir();
+    const remoteUrls = execSync(`git -C "${gitRoot}" remote -v`).toString();
     const remoteName = remoteUrls.split('\n').find((line: string) => line.includes(remoteUrl));
     return remoteName ? remoteName.split('\t')[0] : '';
 }

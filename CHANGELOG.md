@@ -103,3 +103,28 @@ This file is written automatically by the [version bump script](version-bump.ts)
 -   Enhanced the configuration management system within Evergit.
 -   Removed the `open` package and its type definitions from dependencies.
 -   Applied code formatting improvements for better readability.
+
+## [0.2.1] - 2025-06-26
+
+![Increment](https://img.shields.io/badge/patch-purple)
+
+# Changelog
+
+-   **Error Handling:**
+
+    -   Improved error handling in the `getCurrentBranchName` function.
+    -   Enhanced the `getCurrentBranchName` function to support new repositories and the detached HEAD state.
+    -   Provided error guidance for missing Git user configuration.
+
+-   **Testing:**
+
+    -   Refactored Git utilities tests for style consistency.
+    -   Added detailed integration tests for Git utilities.
+    -   Added test for `getGitRootDir` utility function.
+
+-   **Features:**
+
+    -   Added git root directory support to Git functions.
+
+-   **Code Quality:**
+    -   Prettified code for better readability and consistency.
