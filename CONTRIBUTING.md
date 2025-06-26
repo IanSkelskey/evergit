@@ -77,6 +77,28 @@ Before a pull request is merged into the `main` branch, ensure:
     npm start commit -- -a
     ```
 
+5. **Test as a global command (recommended):**
+   Use `npm link` to create a local symlink that allows you to test the CLI as if it were installed globally:
+   
+    ```bash
+    npm link
+    ```
+    
+    Now you can use `evergit` commands directly:
+    ```bash
+    evergit commit -a
+    evergit config --get-all
+    ```
+    
+    To unlink when you're done testing:
+    ```bash
+    npm unlink -g evergit
+    ```
+
+    Or to return to the latest release version:
+    ```bash
+    npm install -g evergit@latest
+    ```
 ---
 
 ## Testing the Code
