@@ -169,11 +169,19 @@ export function hasGitChanges(): boolean {
 }
 
 export function getName(): string {
-    return execSync('git config user.name').toString().trim();
+    try {
+        return execSync('git config user.name', { encoding: 'utf-8' }).trim();
+    } catch {
+        return '';
+    }
 }
 
 export function getEmail(): string {
-    return execSync('git config user.email').toString().trim();
+    try {
+        return execSync('git config user.email', { encoding: 'utf-8' }).trim();
+    } catch {
+        return '';
+    }
 }
 
 export function commitWithMessage(message: string): void {

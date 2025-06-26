@@ -150,6 +150,40 @@ describe('Git Utilities Integration Tests', () => {
             expect(getName()).toBe('Test User');
             expect(getEmail()).toBe('test@example.com');
         });
+
+        test('should return empty string when name is not configured', () => {
+            const { getName } = require('../../src/util/git');
+            const childProcess = require('child_process');
+            const originalExecSync = childProcess.execSync;
+            childProcess.execSync = jest.fn((cmd: string, options?: any) => {
+                if (typeof cmd === 'string' && cmd === 'git config user.name') {
+                    throw new Error('No user.name set');
+                }
+                return originalExecSync(cmd, options);
+            });
+            try {
+                expect(getName()).toBe('');
+            } finally {
+                childProcess.execSync = originalExecSync;
+            }
+        });
+
+        test('should return empty string when email is not configured', () => {
+            const { getEmail } = require('../../src/util/git');
+            const childProcess = require('child_process');
+            const originalExecSync = childProcess.execSync;
+            childProcess.execSync = jest.fn((cmd: string, options?: any) => {
+                if (typeof cmd === 'string' && cmd === 'git config user.email') {
+                    throw new Error('No user.email set');
+                }
+                return originalExecSync(cmd, options);
+            });
+            try {
+                expect(getEmail()).toBe('');
+            } finally {
+                childProcess.execSync = originalExecSync;
+            }
+        });
     });
 
     describe('commitWithMessage', () => {
