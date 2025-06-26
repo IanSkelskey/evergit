@@ -7,6 +7,10 @@ const CONFIG_PATH = join(homedir(), '.evergitconfig');
 interface Config {
     name?: string;
     email?: string;
+    provider?: 'openai' | 'ollama';
+    openaiModel?: string;
+    ollamaModel?: string;
+    ollamaBaseUrl?: string;
 }
 
 function loadConfig(): Config {
@@ -23,7 +27,15 @@ function saveConfig(config: Config): void {
 
 function setConfig(key: keyof Config, value: string): void {
     const config = loadConfig();
-    config[key] = value;
+    if (key === 'provider') {
+        if (value === 'openai' || value === 'ollama') {
+            config[key] = value as 'openai' | 'ollama';
+        } else {
+            throw new Error(`Invalid value for provider: ${value}`);
+        }
+    } else {
+        config[key] = value as any;
+    }
     saveConfig(config);
 }
 
@@ -43,7 +55,7 @@ function getAllConfig(): Config {
 }
 
 function isValidKey(key: string): key is keyof Config {
-    return ['name', 'email'].includes(key);
+    return ['name', 'email', 'provider', 'openaiModel', 'ollamaModel', 'ollamaBaseUrl'].includes(key);
 }
 
 export { setConfig, getConfig, clearConfig, getAllConfig, loadConfig, saveConfig, isValidKey, CONFIG_PATH };

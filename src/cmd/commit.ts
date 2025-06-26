@@ -1,4 +1,4 @@
-import { createTextGeneration, setModel } from '../util/ai';
+import { createTextGeneration, setModel, initializeFromConfig, setProvider, getProviderName } from '../util/ai';
 import {
     isInGitRepo,
     hasGitChanges,
@@ -23,7 +23,26 @@ import {
 } from '../util/prompt';
 import { authenticateLaunchpad, loadCredentials, getBugInfo, BugMessage } from '../util/launchpad';
 
-async function commit(model: string, addAllChanges: boolean = false): Promise<void> {
+async function commit(model: string | undefined, addAllChanges: boolean = false, provider?: string): Promise<void> {
+    // Initialize from config first
+    initializeFromConfig();
+
+    // Override provider if specified
+    if (provider) {
+        if (provider !== 'openai' && provider !== 'ollama') {
+            print('error', 'Invalid provider. Must be "openai" or "ollama".');
+            return;
+        }
+        setProvider(provider as 'openai' | 'ollama');
+    }
+
+    // Validate API key for the selected provider
+    const currentProvider = getProviderName();
+    if (currentProvider === 'openai' && !process.env.OPENAI_API_KEY) {
+        print('error', 'OpenAI API key not found. Please set OPENAI_API_KEY environment variable.');
+        return;
+    }
+
     if (model) {
         try {
             await setModel(model);
@@ -41,7 +60,7 @@ async function commit(model: string, addAllChanges: boolean = false): Promise<vo
         stageAllFiles();
     } else {
         const filesToStage = await getStagedFiles();
-        filesToStage.forEach(stageFile);
+        filesToStage.forEach((file) => stageFile(file.trim()));
     }
 
     const branch = getCurrentBranchName();

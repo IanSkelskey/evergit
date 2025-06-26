@@ -3,6 +3,8 @@
 import { Command } from 'commander';
 import commit from './cmd/commit';
 import { setConfig, getConfig, clearConfig, getAllConfig, isValidKey, CONFIG_PATH } from './cmd/config';
+import { selectProvider, promptOllamaSetup, selectModel } from './util/prompt';
+import { listModelsForProvider } from './util/ai';
 import inquirer from 'inquirer';
 import { exec } from 'child_process';
 
@@ -21,15 +23,16 @@ function getGitEditor(): Promise<string> {
 }
 
 export async function main(args = process.argv): Promise<void> {
-    program.name('evergit').description('Automate your Evergreen ILS git workflow').version('0.2.1');
+    program.name('evergit').description('Automate your Evergreen ILS git workflow').version('0.3.0');
 
     program
         .command('commit')
-        .description('Run the evergreen commit workflow. Requires a OPENAI_API_KEY environment variable to be set.')
-        .option('-m, --model <model>', 'Set the OpenAI model to use', 'gpt-4o')
+        .description('Run the evergreen commit workflow. Requires API keys to be set.')
+        .option('-m, --model <model>', 'Set the AI model to use')
         .option('-a, --all', 'Add all files to the commit')
+        .option('-p, --provider <provider>', 'Set the AI provider (openai or ollama)')
         .action(async (options) => {
-            await commit(options.model, options.all);
+            await commit(options.model, options.all, options.provider);
         });
 
     program
@@ -40,13 +43,126 @@ export async function main(args = process.argv): Promise<void> {
         .option('--clear <key>', 'Clear a configuration option')
         .option('--get-all', 'Get the entire configuration')
         .option('--edit', 'Edit the configuration file manually')
+        .option('--setup-provider', 'Setup AI provider configuration')
         .action(async (options) => {
+            if (options.setupProvider) {
+                const provider = await selectProvider();
+                setConfig('provider', provider);
+
+                if (provider === 'ollama') {
+                    const { baseUrl } = await inquirer.prompt({
+                        type: 'input',
+                        name: 'baseUrl',
+                        message: 'Enter the Ollama base URL:',
+                        default: 'http://localhost:11434',
+                    });
+                    setConfig('ollamaBaseUrl', baseUrl);
+
+                    try {
+                        console.log('Fetching available Ollama models...');
+                        const models = await listModelsForProvider('ollama', baseUrl);
+                        if (models.length === 0) {
+                            console.error('No models found. Please ensure Ollama is running and has models installed.');
+                            return;
+                        }
+                        const model = await selectModel(models, 'Select the default Ollama model:', 'llama3.2');
+                        setConfig('ollamaModel', model);
+                        console.log(`Ollama configured with base URL: ${baseUrl} and model: ${model}`);
+                    } catch (error) {
+                        console.error('Failed to fetch Ollama models. Please ensure Ollama is running.');
+                        console.error(`Error: ${(error as Error).message}`);
+                    }
+                } else {
+                    if (!process.env.OPENAI_API_KEY) {
+                        console.error('OpenAI API key not found. Please set the OPENAI_API_KEY environment variable.');
+                        return;
+                    }
+                    try {
+                        console.log('Fetching available OpenAI models...');
+                        const models = await listModelsForProvider('openai');
+                        const gptModels = models.filter((m) => m.startsWith('gpt'));
+                        const model = await selectModel(gptModels, 'Select the default OpenAI model:', 'gpt-4o');
+                        setConfig('openaiModel', model);
+                        console.log(`OpenAI configured with model: ${model}`);
+                    } catch (error) {
+                        console.error('Failed to fetch OpenAI models. Please check your API key.');
+                        console.error(`Error: ${(error as Error).message}`);
+                    }
+                }
+                console.log(`Provider set to: ${provider}`);
+                return;
+            }
+
             if (options.set) {
                 if (!isValidKey(options.set)) {
                     console.log(`Invalid configuration key: ${options.set}`);
-                    console.log(`Valid keys are: name, email`);
+                    console.log(`Valid keys are: name, email, provider, openaiModel, ollamaModel, ollamaBaseUrl`);
                     return;
                 }
+
+                if (options.set === 'provider') {
+                    const provider = await selectProvider();
+                    setConfig('provider', provider);
+                    console.log(`Provider set to: ${provider}`);
+
+                    if (provider === 'ollama' && !getConfig('ollamaBaseUrl')) {
+                        const { baseUrl } = await inquirer.prompt({
+                            type: 'input',
+                            name: 'baseUrl',
+                            message: 'Enter the Ollama base URL:',
+                            default: 'http://localhost:11434',
+                        });
+                        setConfig('ollamaBaseUrl', baseUrl);
+
+                        try {
+                            const models = await listModelsForProvider('ollama', baseUrl);
+                            if (models.length > 0) {
+                                const model = await selectModel(models, 'Select the default Ollama model:', 'llama3.2');
+                                setConfig('ollamaModel', model);
+                            }
+                        } catch (error) {
+                            console.error('Failed to fetch Ollama models.');
+                        }
+                    }
+                    return;
+                }
+
+                if (options.set === 'openaiModel') {
+                    if (!process.env.OPENAI_API_KEY) {
+                        console.error('OpenAI API key not found. Please set the OPENAI_API_KEY environment variable.');
+                        return;
+                    }
+                    try {
+                        console.log('Fetching available OpenAI models...');
+                        const models = await listModelsForProvider('openai');
+                        const gptModels = models.filter((m) => m.startsWith('gpt'));
+                        const model = await selectModel(gptModels, 'Select the OpenAI model:');
+                        setConfig('openaiModel', model);
+                        console.log(`OpenAI model set to: ${model}`);
+                    } catch (error) {
+                        console.error('Failed to fetch OpenAI models.');
+                    }
+                    return;
+                }
+
+                if (options.set === 'ollamaModel') {
+                    const baseUrl = getConfig('ollamaBaseUrl') || 'http://localhost:11434';
+                    try {
+                        console.log('Fetching available Ollama models...');
+                        const models = await listModelsForProvider('ollama', baseUrl);
+                        if (models.length === 0) {
+                            console.error('No models found. Please ensure Ollama is running and has models installed.');
+                            return;
+                        }
+                        const model = await selectModel(models, 'Select the Ollama model:');
+                        setConfig('ollamaModel', model);
+                        console.log(`Ollama model set to: ${model}`);
+                    } catch (error) {
+                        console.error('Failed to fetch Ollama models. Please ensure Ollama is running.');
+                    }
+                    return;
+                }
+
                 const { value } = await inquirer.prompt({
                     type: 'input',
                     name: 'value',

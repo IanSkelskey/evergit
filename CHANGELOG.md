@@ -128,3 +128,28 @@ This file is written automatically by the [version bump script](version-bump.ts)
 
 -   **Code Quality:**
     -   Prettified code for better readability and consistency.
+
+## [0.3.0] - 2025-06-26
+
+![Increment](https://img.shields.io/badge/minor-orange)
+
+# Changelog
+
+### Enhancements
+
+-   Enhanced Evergit to support multiple AI providers (OpenAI and Ollama) with configurable settings, including model selection and base URL.
+-   Updated README with new features and usage instructions.
+
+### Improvements
+
+-   Improved CLI tests for provider parameter.
+-   Updated model configuration prompts to fetch and display available models.
+
+### Maintenance
+
+-   Prettified codebase.
+-   Updated `node_modules/@babel/code-frame`.
+
+### Documentation
+
+-   Added instructions for testing Evergit as a global command.

@@ -24,14 +24,14 @@ describe('Main CLI', () => {
         process.argv = ['node', 'main.js', 'commit'];
         await main();
 
-        expect(commit).toHaveBeenCalledWith('gpt-4o', undefined); // Default model, no `--all`
+        expect(commit).toHaveBeenCalledWith(undefined, undefined, undefined); // Default model, no `--all`, no provider
     });
 
     test('should call commit command with custom model and --all option', async () => {
         process.argv = ['node', 'main.js', 'commit', '-m', 'gpt-3.5', '--all'];
         await main();
 
-        expect(commit).toHaveBeenCalledWith('gpt-3.5', true);
+        expect(commit).toHaveBeenCalledWith('gpt-3.5', true, undefined); // Custom model, --all, no provider
     });
 
     test('should show help when no arguments are passed', async () => {

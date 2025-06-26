@@ -1,4 +1,11 @@
-import { createTextGeneration, setModel, getModel, validateModelName, listModelNames } from '../../src/util/ai';
+import {
+    createTextGeneration,
+    setModel,
+    getModel,
+    validateModelName,
+    listModelNames,
+    listModelsForProvider,
+} from '../../src/util/ai';
 
 // Mock `print` function from the prompt module and directly handle console.error and console.warn
 jest.mock('../../src/util/prompt', () => ({
