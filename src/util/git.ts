@@ -120,26 +120,26 @@ function removeDiffForFile(diff: string, filePath: string): string {
 export function getCurrentBranchName(): string {
     try {
         const gitRoot = getGitRootDir();
-        
+
         // First try the standard approach
         try {
             const branchName = execSync(`git -C "${gitRoot}" rev-parse --abbrev-ref HEAD`, {
                 encoding: 'utf-8',
-                stdio: ['pipe', 'pipe', 'pipe'] // Capture stderr
+                stdio: ['pipe', 'pipe', 'pipe'], // Capture stderr
             }).trim();
-            
+
             if (branchName === 'HEAD') {
                 // We're in a detached HEAD state
                 throw new Error('Repository is in detached HEAD state. Please checkout a branch.');
             }
-            
+
             return branchName;
         } catch (error: any) {
             // If rev-parse fails, try symbolic-ref for new repos
             if (error.message?.includes('ambiguous argument') || error.message?.includes('unknown revision')) {
                 try {
                     const branchName = execSync(`git -C "${gitRoot}" symbolic-ref --short HEAD`, {
-                        encoding: 'utf-8'
+                        encoding: 'utf-8',
                     }).trim();
                     return branchName;
                 } catch {
@@ -147,7 +147,7 @@ export function getCurrentBranchName(): string {
                     // Try to get the default branch name from config
                     try {
                         const defaultBranch = execSync(`git -C "${gitRoot}" config init.defaultBranch`, {
-                            encoding: 'utf-8'
+                            encoding: 'utf-8',
                         }).trim();
                         return defaultBranch || 'main'; // Default to 'main' if not configured
                     } catch {
