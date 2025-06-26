@@ -3,7 +3,8 @@
 import { Command } from 'commander';
 import commit from './cmd/commit';
 import { setConfig, getConfig, clearConfig, getAllConfig, isValidKey, CONFIG_PATH } from './cmd/config';
-import { selectProvider, promptOllamaSetup } from './util/prompt';
+import { selectProvider, promptOllamaSetup, selectModel } from './util/prompt';
+import { listModelsForProvider } from './util/ai';
 import inquirer from 'inquirer';
 import { exec } from 'child_process';
 
@@ -49,19 +50,44 @@ export async function main(args = process.argv): Promise<void> {
                 setConfig('provider', provider);
 
                 if (provider === 'ollama') {
-                    const { baseUrl, model } = await promptOllamaSetup();
-                    setConfig('ollamaBaseUrl', baseUrl);
-                    setConfig('ollamaModel', model);
-                    console.log(`Ollama configured with base URL: ${baseUrl} and model: ${model}`);
-                } else {
-                    const { model } = await inquirer.prompt({
+                    const { baseUrl } = await inquirer.prompt({
                         type: 'input',
-                        name: 'model',
-                        message: 'Enter the default OpenAI model:',
-                        default: 'gpt-4o',
+                        name: 'baseUrl',
+                        message: 'Enter the Ollama base URL:',
+                        default: 'http://localhost:11434',
                     });
-                    setConfig('openaiModel', model);
-                    console.log(`OpenAI configured with model: ${model}`);
+                    setConfig('ollamaBaseUrl', baseUrl);
+
+                    try {
+                        console.log('Fetching available Ollama models...');
+                        const models = await listModelsForProvider('ollama', baseUrl);
+                        if (models.length === 0) {
+                            console.error('No models found. Please ensure Ollama is running and has models installed.');
+                            return;
+                        }
+                        const model = await selectModel(models, 'Select the default Ollama model:', 'llama3.2');
+                        setConfig('ollamaModel', model);
+                        console.log(`Ollama configured with base URL: ${baseUrl} and model: ${model}`);
+                    } catch (error) {
+                        console.error('Failed to fetch Ollama models. Please ensure Ollama is running.');
+                        console.error(`Error: ${(error as Error).message}`);
+                    }
+                } else {
+                    if (!process.env.OPENAI_API_KEY) {
+                        console.error('OpenAI API key not found. Please set the OPENAI_API_KEY environment variable.');
+                        return;
+                    }
+                    try {
+                        console.log('Fetching available OpenAI models...');
+                        const models = await listModelsForProvider('openai');
+                        const gptModels = models.filter(m => m.startsWith('gpt'));
+                        const model = await selectModel(gptModels, 'Select the default OpenAI model:', 'gpt-4o');
+                        setConfig('openaiModel', model);
+                        console.log(`OpenAI configured with model: ${model}`);
+                    } catch (error) {
+                        console.error('Failed to fetch OpenAI models. Please check your API key.');
+                        console.error(`Error: ${(error as Error).message}`);
+                    }
                 }
                 console.log(`Provider set to: ${provider}`);
                 return;
@@ -80,9 +106,59 @@ export async function main(args = process.argv): Promise<void> {
                     console.log(`Provider set to: ${provider}`);
 
                     if (provider === 'ollama' && !getConfig('ollamaBaseUrl')) {
-                        const { baseUrl, model } = await promptOllamaSetup();
+                        const { baseUrl } = await inquirer.prompt({
+                            type: 'input',
+                            name: 'baseUrl',
+                            message: 'Enter the Ollama base URL:',
+                            default: 'http://localhost:11434',
+                        });
                         setConfig('ollamaBaseUrl', baseUrl);
+
+                        try {
+                            const models = await listModelsForProvider('ollama', baseUrl);
+                            if (models.length > 0) {
+                                const model = await selectModel(models, 'Select the default Ollama model:', 'llama3.2');
+                                setConfig('ollamaModel', model);
+                            }
+                        } catch (error) {
+                            console.error('Failed to fetch Ollama models.');
+                        }
+                    }
+                    return;
+                }
+
+                if (options.set === 'openaiModel') {
+                    if (!process.env.OPENAI_API_KEY) {
+                        console.error('OpenAI API key not found. Please set the OPENAI_API_KEY environment variable.');
+                        return;
+                    }
+                    try {
+                        console.log('Fetching available OpenAI models...');
+                        const models = await listModelsForProvider('openai');
+                        const gptModels = models.filter(m => m.startsWith('gpt'));
+                        const model = await selectModel(gptModels, 'Select the OpenAI model:');
+                        setConfig('openaiModel', model);
+                        console.log(`OpenAI model set to: ${model}`);
+                    } catch (error) {
+                        console.error('Failed to fetch OpenAI models.');
+                    }
+                    return;
+                }
+
+                if (options.set === 'ollamaModel') {
+                    const baseUrl = getConfig('ollamaBaseUrl') || 'http://localhost:11434';
+                    try {
+                        console.log('Fetching available Ollama models...');
+                        const models = await listModelsForProvider('ollama', baseUrl);
+                        if (models.length === 0) {
+                            console.error('No models found. Please ensure Ollama is running and has models installed.');
+                            return;
+                        }
+                        const model = await selectModel(models, 'Select the Ollama model:');
                         setConfig('ollamaModel', model);
+                        console.log(`Ollama model set to: ${model}`);
+                    } catch (error) {
+                        console.error('Failed to fetch Ollama models. Please ensure Ollama is running.');
                     }
                     return;
                 }

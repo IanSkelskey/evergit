@@ -276,7 +276,16 @@ export async function validateModelName(modelName: string): Promise<boolean> {
 }
 
 export async function listModelNames(): Promise<string[]> {
+    // Initialize from config if not already done
+    initializeFromConfig();
     return getProvider().listModels();
+}
+
+export async function listModelsForProvider(provider: 'openai' | 'ollama', ollamaUrl?: string): Promise<string[]> {
+    const modelProvider = provider === 'ollama' 
+        ? new OllamaProvider(ollamaUrl || OLLAMA_BASE_URL) 
+        : new OpenAIProvider();
+    return modelProvider.listModels();
 }
 
 export async function createTextGeneration(systemPrompt: string, userPrompt: string): Promise<string | null> {

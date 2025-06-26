@@ -105,6 +105,18 @@ export async function selectProvider(): Promise<'openai' | 'ollama'> {
     return provider;
 }
 
+export async function selectModel(models: string[], message: string, defaultModel?: string): Promise<string> {
+    const { model } = await inquirer.prompt({
+        type: 'list',
+        name: 'model',
+        message,
+        choices: models,
+        default: defaultModel,
+        pageSize: 10, // Show 10 models at a time for better navigation
+    });
+    return model;
+}
+
 export function print(type: string, message: string): void {
     if (type === 'error') {
         console.error(colors[type](message));
