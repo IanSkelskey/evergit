@@ -183,9 +183,9 @@ describe('Git Utilities Integration Tests', () => {
             const originalExecSync = childProcess.execSync;
             childProcess.execSync = jest.fn((cmd: string, options?: any) => {
                 if (typeof cmd === 'string' && cmd.includes('diff --staged')) {
-                    const err = new Error('ENOBUFS'); 
-                    (err as any).code = 'ENOBUFS'; 
-                    throw err; 
+                    const err = new Error('ENOBUFS');
+                    (err as any).code = 'ENOBUFS';
+                    throw err;
                 }
                 return originalExecSync(cmd, options);
             });
