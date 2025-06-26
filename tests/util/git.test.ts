@@ -73,6 +73,24 @@ describe('Git Utilities Integration Tests', () => {
             const branchName = getCurrentBranchName();
             expect(branchName === 'master' || branchName === 'main').toBe(true);
         });
+        
+        test('should handle new repository with no commits', () => {
+            // Create a new test directory for this specific test
+            const newRepoDir = fs.mkdtempSync(path.join(os.tmpdir(), 'new-repo-'));
+            const originalCwd = process.cwd();
+            
+            try {
+                process.chdir(newRepoDir);
+                execSync('git init');
+                
+                // Should still be able to get branch name even with no commits
+                const branchName = getCurrentBranchName();
+                expect(branchName === 'master' || branchName === 'main').toBe(true);
+            } finally {
+                process.chdir(originalCwd);
+                fs.rmSync(newRepoDir, { recursive: true, force: true });
+            }
+        });
     });
 
     describe('getStatusForFile', () => {
