@@ -7,6 +7,7 @@ import {
     commitWithMessage,
     setUserEmail,
     setUserName,
+    getGitRootDir,
 } from '../../src/util/git';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
@@ -45,6 +46,16 @@ describe('Git Utilities Integration Tests', () => {
     describe('isInGitRepo', () => {
         test('should return true if inside a Git repository', () => {
             expect(isInGitRepo()).toBe(true);
+        });
+    });
+
+    describe('getGitRootDir', () => {
+        test('should return the root directory of the Git repository', () => {
+            const rootDir = getGitRootDir();
+            // Normalize paths to use forward slashes for comparison
+            const normalizedRootDir = rootDir.replace(/\\/g, '/');
+            const normalizedTestRepoDir = testRepoDir.replace(/\\/g, '/');
+            expect(normalizedRootDir).toBe(normalizedTestRepoDir);
         });
     });
 
