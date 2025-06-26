@@ -76,7 +76,7 @@ export async function selectFilesToStage(files: string[]): Promise<string[]> {
 
 export async function promptOllamaSetup(): Promise<{ baseUrl: string; model: string }> {
     print('info', 'Setting up Ollama for the first time...');
-    
+
     const { baseUrl } = await inquirer.prompt({
         type: 'input',
         name: 'baseUrl',

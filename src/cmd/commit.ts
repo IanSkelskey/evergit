@@ -26,7 +26,7 @@ import { authenticateLaunchpad, loadCredentials, getBugInfo, BugMessage } from '
 async function commit(model: string | undefined, addAllChanges: boolean = false, provider?: string): Promise<void> {
     // Initialize from config first
     initializeFromConfig();
-    
+
     // Override provider if specified
     if (provider) {
         if (provider !== 'openai' && provider !== 'ollama') {
@@ -35,14 +35,14 @@ async function commit(model: string | undefined, addAllChanges: boolean = false,
         }
         setProvider(provider as 'openai' | 'ollama');
     }
-    
+
     // Validate API key for the selected provider
     const currentProvider = getProviderName();
     if (currentProvider === 'openai' && !process.env.OPENAI_API_KEY) {
         print('error', 'OpenAI API key not found. Please set OPENAI_API_KEY environment variable.');
         return;
     }
-    
+
     if (model) {
         try {
             await setModel(model);
@@ -60,7 +60,7 @@ async function commit(model: string | undefined, addAllChanges: boolean = false,
         stageAllFiles();
     } else {
         const filesToStage = await getStagedFiles();
-        filesToStage.forEach(file => stageFile(file.trim()));
+        filesToStage.forEach((file) => stageFile(file.trim()));
     }
 
     const branch = getCurrentBranchName();

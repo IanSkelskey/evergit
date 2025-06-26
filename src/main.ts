@@ -47,7 +47,7 @@ export async function main(args = process.argv): Promise<void> {
             if (options.setupProvider) {
                 const provider = await selectProvider();
                 setConfig('provider', provider);
-                
+
                 if (provider === 'ollama') {
                     const { baseUrl, model } = await promptOllamaSetup();
                     setConfig('ollamaBaseUrl', baseUrl);
@@ -66,19 +66,19 @@ export async function main(args = process.argv): Promise<void> {
                 console.log(`Provider set to: ${provider}`);
                 return;
             }
-            
+
             if (options.set) {
                 if (!isValidKey(options.set)) {
                     console.log(`Invalid configuration key: ${options.set}`);
                     console.log(`Valid keys are: name, email, provider, openaiModel, ollamaModel, ollamaBaseUrl`);
                     return;
                 }
-                
+
                 if (options.set === 'provider') {
                     const provider = await selectProvider();
                     setConfig('provider', provider);
                     console.log(`Provider set to: ${provider}`);
-                    
+
                     if (provider === 'ollama' && !getConfig('ollamaBaseUrl')) {
                         const { baseUrl, model } = await promptOllamaSetup();
                         setConfig('ollamaBaseUrl', baseUrl);
@@ -86,7 +86,7 @@ export async function main(args = process.argv): Promise<void> {
                     }
                     return;
                 }
-                
+
                 const { value } = await inquirer.prompt({
                     type: 'input',
                     name: 'value',
