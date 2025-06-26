@@ -1,6 +1,6 @@
 # EverGit
 
-![Version](https://img.shields.io/badge/version-0.2.1-blue)
+![Version](https://img.shields.io/badge/version-0.3.0-blue)
 
 ![TypeScript](https://img.shields.io/badge/typescript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-00A79D?style=for-the-badge&logo=openai&logoColor=white)
@@ -134,13 +134,13 @@ To use Ollama models:
 
 1. Install and run Ollama locally (see [ollama.ai](https://ollama.ai))
 2. Configure evergit to use Ollama:
-   ```bash
-   evergit config --setup-provider
-   # Select "ollama" and follow the prompts
-   ```
+    ```bash
+    evergit config --setup-provider
+    # Select "ollama" and follow the prompts
+    ```
 3. Or set manually:
-   ```bash
-   evergit config --set provider ollama
-   evergit config --set ollamaBaseUrl "http://localhost:11434"
-   evergit config --set ollamaModel "llama3.2"
-   ```
+    ```bash
+    evergit config --set provider ollama
+    evergit config --set ollamaBaseUrl "http://localhost:11434"
+    evergit config --set ollamaModel "llama3.2"
+    ```
