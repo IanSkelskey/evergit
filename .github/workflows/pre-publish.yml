@@ -33,7 +33,7 @@ jobs:
         needs: prettier-check
         permissions:
             contents: read
-            actions: write  # For uploading artifacts
+            actions: write # For uploading artifacts
         steps:
             - name: Checkout code
               uses: actions/checkout@v2

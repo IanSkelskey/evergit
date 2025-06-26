@@ -23,7 +23,7 @@ function getGitEditor(): Promise<string> {
 }
 
 export async function main(args = process.argv): Promise<void> {
-    program.name('evergit').description('Automate your Evergreen ILS git workflow').version('0.3.0');
+    program.name('evergit').description('Automate your Evergreen ILS git workflow').version('0.3.1');
 
     program
         .command('commit')

@@ -153,3 +153,16 @@ This file is written automatically by the [version bump script](version-bump.ts)
 ### Documentation
 
 -   Added instructions for testing Evergit as a global command.
+
+## [0.3.1] - 2025-06-26
+
+![Increment](https://img.shields.io/badge/patch-purple)
+
+## Changelog Summary
+
+-   **GitHub Actions Workflow Enhancements**
+
+    -   Updated workflows to include explicit permissions for improved security and clarity.
+
+-   **Commit Message Sanitizer Fix**
+    -   Escaped backslashes before double quotes to ensure correct processing of commit messages.
