@@ -195,7 +195,8 @@ export function commitWithMessage(message: string): void {
 }
 
 function sanitizeCommitMessage(message: string): string {
-    return message.replace(/"/g, '\\"');
+    // First escape backslashes, then escape double quotes
+    return message.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
 export function checkForRemote(remoteUrl: string): boolean {
