@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import commit from './cmd/commit';
 import { setConfig, getConfig, clearConfig, getAllConfig, isValidKey, CONFIG_PATH } from './cmd/config';
-import { selectProvider, promptOllamaSetup, selectModel } from './util/prompt';
+import { selectProvider, promptOpenWebuiSetup, selectModel } from './util/prompt';
 import { listModelsForProvider } from './util/ai';
 import inquirer from 'inquirer';
 import { exec } from 'child_process';
@@ -30,7 +30,7 @@ export async function main(args = process.argv): Promise<void> {
         .description('Run the evergreen commit workflow. Requires API keys to be set.')
         .option('-m, --model <model>', 'Set the AI model to use')
         .option('-a, --all', 'Add all files to the commit')
-        .option('-p, --provider <provider>', 'Set the AI provider (openai or ollama)')
+        .option('-p, --provider <provider>', 'Set the AI provider (openai or openwebui)')
         .action(async (options) => {
             await commit(options.model, options.all, options.provider);
         });
@@ -49,27 +49,27 @@ export async function main(args = process.argv): Promise<void> {
                 const provider = await selectProvider();
                 setConfig('provider', provider);
 
-                if (provider === 'ollama') {
+                if (provider === 'openwebui') {
                     const { baseUrl } = await inquirer.prompt({
                         type: 'input',
                         name: 'baseUrl',
-                        message: 'Enter the Ollama base URL:',
+                        message: 'Enter the Open WebUI base URL:',
                         default: 'http://localhost:11434',
                     });
-                    setConfig('ollamaBaseUrl', baseUrl);
+                    setConfig('openwebuiBaseUrl', baseUrl);
 
                     try {
-                        console.log('Fetching available Ollama models...');
-                        const models = await listModelsForProvider('ollama', baseUrl);
+                        console.log('Fetching available Open WebUI models...');
+                        const models = await listModelsForProvider('openwebui', baseUrl);
                         if (models.length === 0) {
-                            console.error('No models found. Please ensure Ollama is running and has models installed.');
+                            console.error('No models found. Please ensure Open WebUI is running and has models installed.');
                             return;
                         }
-                        const model = await selectModel(models, 'Select the default Ollama model:', 'llama3.2');
-                        setConfig('ollamaModel', model);
-                        console.log(`Ollama configured with base URL: ${baseUrl} and model: ${model}`);
+                        const model = await selectModel(models, 'Select the default Open WebUI model:', 'llama3.2');
+                        setConfig('openwebuiModel', model);
+                        console.log(`Open WebUI configured with base URL: ${baseUrl} and model: ${model}`);
                     } catch (error) {
-                        console.error('Failed to fetch Ollama models. Please ensure Ollama is running.');
+                        console.error('Failed to fetch Open WebUI models. Please ensure the service is running.');
                         console.error(`Error: ${(error as Error).message}`);
                     }
                 } else {
@@ -96,7 +96,7 @@ export async function main(args = process.argv): Promise<void> {
             if (options.set) {
                 if (!isValidKey(options.set)) {
                     console.log(`Invalid configuration key: ${options.set}`);
-                    console.log(`Valid keys are: name, email, provider, openaiModel, ollamaModel, ollamaBaseUrl`);
+                    console.log(`Valid keys are: name, email, provider, openaiModel, openwebuiModel, openwebuiBaseUrl`);
                     return;
                 }
 
@@ -105,23 +105,23 @@ export async function main(args = process.argv): Promise<void> {
                     setConfig('provider', provider);
                     console.log(`Provider set to: ${provider}`);
 
-                    if (provider === 'ollama' && !getConfig('ollamaBaseUrl')) {
+                    if (provider === 'openwebui' && !getConfig('openwebuiBaseUrl')) {
                         const { baseUrl } = await inquirer.prompt({
                             type: 'input',
                             name: 'baseUrl',
-                            message: 'Enter the Ollama base URL:',
+                            message: 'Enter the Open WebUI base URL:',
                             default: 'http://localhost:11434',
                         });
-                        setConfig('ollamaBaseUrl', baseUrl);
+                        setConfig('openwebuiBaseUrl', baseUrl);
 
                         try {
-                            const models = await listModelsForProvider('ollama', baseUrl);
+                            const models = await listModelsForProvider('openwebui', baseUrl);
                             if (models.length > 0) {
-                                const model = await selectModel(models, 'Select the default Ollama model:', 'llama3.2');
-                                setConfig('ollamaModel', model);
+                                const model = await selectModel(models, 'Select the default Open WebUI model:', 'llama3.2');
+                                setConfig('openwebuiModel', model);
                             }
                         } catch (error) {
-                            console.error('Failed to fetch Ollama models.');
+                            console.error('Failed to fetch Open WebUI models.');
                         }
                     }
                     return;
@@ -145,20 +145,20 @@ export async function main(args = process.argv): Promise<void> {
                     return;
                 }
 
-                if (options.set === 'ollamaModel') {
-                    const baseUrl = getConfig('ollamaBaseUrl') || 'http://localhost:11434';
+                if (options.set === 'openwebuiModel') {
+                    const baseUrl = getConfig('openwebuiBaseUrl') || 'http://localhost:11434';
                     try {
-                        console.log('Fetching available Ollama models...');
-                        const models = await listModelsForProvider('ollama', baseUrl);
+                        console.log('Fetching available Open WebUI models...');
+                        const models = await listModelsForProvider('openwebui', baseUrl);
                         if (models.length === 0) {
-                            console.error('No models found. Please ensure Ollama is running and has models installed.');
+                            console.error('No models found. Please ensure Open WebUI is running and has models installed.');
                             return;
                         }
-                        const model = await selectModel(models, 'Select the Ollama model:');
-                        setConfig('ollamaModel', model);
-                        console.log(`Ollama model set to: ${model}`);
+                        const model = await selectModel(models, 'Select the Open WebUI model:');
+                        setConfig('openwebuiModel', model);
+                        console.log(`Open WebUI model set to: ${model}`);
                     } catch (error) {
-                        console.error('Failed to fetch Ollama models. Please ensure Ollama is running.');
+                        console.error('Failed to fetch Open WebUI models. Please ensure the service is running.');
                     }
                     return;
                 }

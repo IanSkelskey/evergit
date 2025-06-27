@@ -13,3 +13,4 @@ npm-debug.log*
 # Development
 .VSCodeCounter/
 coverage/
+ollama-debug/

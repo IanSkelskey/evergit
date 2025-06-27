@@ -75,32 +75,32 @@ export async function selectFilesToStage(files: string[]): Promise<string[]> {
     return answer.files;
 }
 
-export async function promptOllamaSetup(): Promise<{ baseUrl: string; model: string }> {
-    print('info', 'Setting up Ollama for the first time...');
+export async function promptOpenWebuiSetup(): Promise<{ baseUrl: string; model: string }> {
+    print('info', 'Setting up Open WebUI for the first time...');
 
     const { baseUrl } = await inquirer.prompt({
         type: 'input',
         name: 'baseUrl',
-        message: 'Enter the Ollama base URL:',
-        default: 'http://localhost:11434',
+        message: 'Enter the Open WebUI base URL:',
+        default: 'http://localhost:8080',
     });
 
     const { model } = await inquirer.prompt({
         type: 'input',
         name: 'model',
-        message: 'Enter the default Ollama model to use:',
+        message: 'Enter the default Open WebUI model to use:',
         default: 'llama3.2',
     });
 
     return { baseUrl, model };
 }
 
-export async function selectProvider(): Promise<'openai' | 'ollama'> {
+export async function selectProvider(): Promise<'openai' | 'openwebui'> {
     const { provider } = await inquirer.prompt({
         type: 'list',
         name: 'provider',
         message: 'Select the AI provider:',
-        choices: ['openai', 'ollama'],
+        choices: ['openai', 'openwebui'],
         default: 'openai',
     });
     return provider;

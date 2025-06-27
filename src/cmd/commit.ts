@@ -30,11 +30,11 @@ async function commit(model: string | undefined, addAllChanges: boolean = false,
 
     // Override provider if specified
     if (provider) {
-        if (provider !== 'openai' && provider !== 'ollama') {
-            print('error', 'Invalid provider. Must be "openai" or "ollama".');
+        if (provider !== 'openai' && provider !== 'openwebui') {
+            print('error', 'Invalid provider. Must be "openai" or "openwebui".');
             return;
         }
-        setProvider(provider as 'openai' | 'ollama');
+        setProvider(provider as 'openai' | 'openwebui');
     }
 
     // Validate API key for the selected provider
@@ -86,7 +86,8 @@ async function generateAndProcessCommit(systemPrompt: string, userPrompt: string
         print('error', 'Failed to generate commit message.');
         return;
     }
-    var confirmed = await confirmCommitMessage(commitMessage);
+    
+    let confirmed = await confirmCommitMessage(commitMessage);
     while (!confirmed) {
         const feedback = await requestFeedback();
         if (feedback === '') {
@@ -95,18 +96,28 @@ async function generateAndProcessCommit(systemPrompt: string, userPrompt: string
             return;
         }
 
-        const newUserPrompt = `${userPrompt}\n\nCommit message draft:\n\n${commitMessage}\n\nFeedback:\n${feedback}`;
+        const newUserPrompt: string = `${userPrompt}\n\nCommit message draft:\n\n${commitMessage}\n\nFeedback:\n${feedback}`;
         spinner.text = 'Regenerating commit message with feedback...';
         spinner.start();
-        const newMessage = await createTextGeneration(systemPrompt, newUserPrompt);
+        const newMessage: string | null = await createTextGeneration(systemPrompt, newUserPrompt);
         spinner.stop();
 
         if (!newMessage) {
             print('error', 'Failed to generate new commit message.');
             return;
         }
+        
+        // Update the commit message with the new version
         confirmed = await confirmCommitMessage(newMessage);
+        if (confirmed) {
+            // Use the confirmed message for the commit
+            commitWithMessage(newMessage);
+            print('success', 'Changes committed successfully.');
+            return;
+        }
     }
+    
+    // If we got here, the original message was confirmed
     commitWithMessage(commitMessage);
     print('success', 'Changes committed successfully.');
 }

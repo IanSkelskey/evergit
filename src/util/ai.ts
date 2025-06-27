@@ -1,22 +1,22 @@
 import { getConfig } from '../cmd/config';
 import { ModelProvider } from './providers/types';
 import { OpenAIProvider } from './providers/openai';
-import { OllamaProvider } from './providers/ollama';
+import { OpenWebuiProvider } from './providers/open_webui';
 
-let PROVIDER: 'openai' | 'ollama' = 'openai';
+let PROVIDER: 'openai' | 'openwebui' = 'openai';
 let OPENAI_MODEL = 'gpt-4o';
-let OLLAMA_MODEL = 'llama3.2';
-let OLLAMA_BASE_URL = 'http://localhost:11434';
+let OPENWEBUI_MODEL = 'llama3.2';
+let OPENWEBUI_BASE_URL = 'http://localhost:11434';
 
 export function initializeFromConfig(): void {
     const config = getConfig('provider');
     if (config) {
-        PROVIDER = config as 'openai' | 'ollama';
+        PROVIDER = config as 'openai' | 'openwebui';
     }
 
-    const ollamaUrl = getConfig('ollamaBaseUrl');
-    if (ollamaUrl) {
-        OLLAMA_BASE_URL = ollamaUrl;
+    const openwebuiUrl = getConfig('openwebuiBaseUrl');
+    if (openwebuiUrl) {
+        OPENWEBUI_BASE_URL = openwebuiUrl;
     }
 
     const openaiModel = getConfig('openaiModel');
@@ -24,14 +24,14 @@ export function initializeFromConfig(): void {
         OPENAI_MODEL = openaiModel;
     }
 
-    const ollamaModel = getConfig('ollamaModel');
-    if (ollamaModel) {
-        OLLAMA_MODEL = ollamaModel;
+    const openwebuiModel = getConfig('openwebuiModel');
+    if (openwebuiModel) {
+        OPENWEBUI_MODEL = openwebuiModel;
     }
 }
 
 function getProvider(): ModelProvider {
-    return PROVIDER === 'ollama' ? new OllamaProvider(OLLAMA_BASE_URL) : new OpenAIProvider();
+    return PROVIDER === 'openwebui' ? new OpenWebuiProvider(OPENWEBUI_BASE_URL) : new OpenAIProvider();
 }
 
 export async function setModel(modelName: string): Promise<void> {
@@ -47,24 +47,24 @@ export async function setModel(modelName: string): Promise<void> {
     if (PROVIDER === 'openai') {
         OPENAI_MODEL = modelName;
     } else {
-        OLLAMA_MODEL = modelName;
+        OPENWEBUI_MODEL = modelName;
     }
 }
 
 export function getModel(): string {
-    return PROVIDER === 'openai' ? OPENAI_MODEL : OLLAMA_MODEL;
+    return PROVIDER === 'openai' ? OPENAI_MODEL : OPENWEBUI_MODEL;
 }
 
 export function getProviderName(): string {
     return PROVIDER;
 }
 
-export function setProvider(provider: 'openai' | 'ollama'): void {
+export function setProvider(provider: 'openai' | 'openwebui'): void {
     PROVIDER = provider;
 }
 
-export function setOllamaBaseUrl(url: string): void {
-    OLLAMA_BASE_URL = url;
+export function setOpenWebuiBaseUrl(url: string): void {
+    OPENWEBUI_BASE_URL = url;
 }
 
 export async function validateModelName(modelName: string): Promise<boolean> {
@@ -77,9 +77,9 @@ export async function listModelNames(): Promise<string[]> {
     return getProvider().listModels();
 }
 
-export async function listModelsForProvider(provider: 'openai' | 'ollama', ollamaUrl?: string): Promise<string[]> {
+export async function listModelsForProvider(provider: 'openai' | 'openwebui', openwebuiUrl?: string): Promise<string[]> {
     const modelProvider =
-        provider === 'ollama' ? new OllamaProvider(ollamaUrl || OLLAMA_BASE_URL) : new OpenAIProvider();
+        provider === 'openwebui' ? new OpenWebuiProvider(openwebuiUrl || OPENWEBUI_BASE_URL) : new OpenAIProvider();
     return modelProvider.listModels();
 }
 

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { print } from '../prompt';
 import { ModelProvider } from './types';
 
-export class OllamaProvider implements ModelProvider {
+export class OpenWebuiProvider implements ModelProvider {
     private baseUrl: string;
 
     constructor(baseUrl: string) {
@@ -20,21 +20,35 @@ export class OllamaProvider implements ModelProvider {
 
     async listModels(): Promise<string[]> {
         try {
-            const response = await axios.get(`${this.baseUrl}/api/tags`, {
-                headers: process.env.OLLAMA_API_KEY ? { Authorization: `Bearer ${process.env.OLLAMA_API_KEY}` } : {},
+            const response = await axios.get(`${this.baseUrl}/api/models`, {
+                headers: process.env.OPENWEBUI_API_KEY ? { Authorization: `Bearer ${process.env.OPENWEBUI_API_KEY}` } : {},
             });
-            return (response.data as { models: { name: string }[] }).models.map((model: any) => model.name);
+            
+            // Handle the response format where models are in a 'data' array
+            const data = response.data as any;
+            if (data.data && Array.isArray(data.data)) {
+                return data.data.map((model: any) => model.name);
+            }
+            // Handle the original expected format with 'models' array
+            else if (data.models && Array.isArray(data.models)) {
+                return data.models.map((model: any) => model.name);
+            } 
+            // If neither format is found, throw an error
+            else {
+                console.error('Unexpected API response format:', data);
+                throw new Error('Unexpected Open WebUI API response format');
+            }
         } catch (error) {
-            throw new Error(`Error fetching Ollama models: ${(error as Error).message}`);
+            throw new Error(`Error fetching Open WebUI models: ${(error as Error).message}`);
         }
     }
 
     async createCompletion(systemPrompt: string, userPrompt: string, model: string): Promise<string | null> {
-        const endpoint = (this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl) + '/api/chat';
+        const endpoint = (this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl) + '/api/chat/completions';
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
-        if (process.env.OLLAMA_API_KEY) {
-            headers['Authorization'] = `Bearer ${process.env.OLLAMA_API_KEY}`;
+        if (process.env.OPENWEBUI_API_KEY) {
+            headers['Authorization'] = `Bearer ${process.env.OPENWEBUI_API_KEY}`;
         }
 
         const requestData = {
@@ -45,8 +59,8 @@ export class OllamaProvider implements ModelProvider {
             ],
         };
 
-        console.debug('Ollama endpoint:', endpoint);
-        console.debug('Ollama model:', model);
+        console.debug('Open WebUI endpoint:', endpoint);
+        console.debug('Open WebUI model:', model);
         console.debug('Request headers:', JSON.stringify(headers, null, 2));
 
         try {
@@ -56,9 +70,9 @@ export class OllamaProvider implements ModelProvider {
             });
 
             // Log the full response structure for debugging
-            console.debug('Ollama response status:', response.status);
-            console.debug('Ollama response headers:', response.headers);
-            console.debug('Ollama response data type:', typeof response.data);
+            console.debug('Open WebUI response status:', response.status);
+            console.debug('Open WebUI response headers:', response.headers);
+            console.debug('Open WebUI response data type:', typeof response.data);
 
             if (typeof response.data === 'string') {
                 console.debug('Response is string, attempting to parse...');
@@ -71,7 +85,7 @@ export class OllamaProvider implements ModelProvider {
                 }
             }
 
-            console.debug('Ollama response structure:', JSON.stringify(response.data, null, 2));
+            console.debug('Open WebUI response structure:', JSON.stringify(response.data, null, 2));
 
             // Try multiple possible response structures
             const responseData = response.data as any;
@@ -95,13 +109,13 @@ export class OllamaProvider implements ModelProvider {
                 return responseData.content.trim();
             }
 
-            // Direct response (some Ollama setups return just the text)
+            // Direct response (some Open WebUI setups return just the text)
             if (typeof responseData === 'string') {
                 return responseData.trim();
             }
 
             // If none of the above, log the structure and return null
-            print('error', `Unexpected Ollama response structure. Check console for details.`);
+            print('error', `Unexpected Open WebUI response structure. Check console for details.`);
             console.error('Unexpected response structure:', responseData);
             return null;
         } catch (error: any) {
@@ -110,32 +124,32 @@ export class OllamaProvider implements ModelProvider {
             if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
                 print(
                     'error',
-                    'Ollama request timed out. The model might be loading or the server is slow. Try increasing the timeout.',
+                    'Open WebUI request timed out. The model might be loading or the server is slow. Try increasing the timeout.',
                 );
             } else if (error.response?.status === 403) {
                 print(
                     'error',
-                    'Authentication failed. Please ensure OLLAMA_API_KEY environment variable is set correctly.',
+                    'Authentication failed. Please ensure OPENWEBUI_API_KEY environment variable is set correctly.',
                 );
                 console.error('Response data:', error.response.data);
             } else if (error.response?.status === 404) {
                 print(
                     'error',
-                    `Model '${model}' not found. Please check if the model is available on your Ollama server.`,
+                    `Model '${model}' not found. Please check if the model is available on your Open WebUI server.`,
                 );
             } else if (error.response?.status === 500) {
-                print('error', 'Ollama server error. Check server logs for details.');
+                print('error', 'Open WebUI server error. Check server logs for details.');
                 console.error('Server error details:', error.response.data);
             } else if (error.response) {
-                print('error', `Ollama API error (${error.response.status}): ${error.response.statusText}`);
+                print('error', `Open WebUI API error (${error.response.status}): ${error.response.statusText}`);
                 if (error.response.data) {
                     console.error('Error details:', error.response.data);
                 }
             } else if (error.request) {
-                print('error', `No response from Ollama server at ${this.baseUrl}. Is the server running?`);
+                print('error', `No response from Open WebUI server at ${this.baseUrl}. Is the server running?`);
                 console.error('Request details:', error.request);
             } else {
-                print('error', `Ollama API error: ${error.message}`);
+                print('error', `Open WebUI API error: ${error.message}`);
             }
             return null;
         }
