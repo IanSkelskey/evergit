@@ -77,7 +77,10 @@ export async function listModelNames(): Promise<string[]> {
     return getProvider().listModels();
 }
 
-export async function listModelsForProvider(provider: 'openai' | 'openwebui', openwebuiUrl?: string): Promise<string[]> {
+export async function listModelsForProvider(
+    provider: 'openai' | 'openwebui',
+    openwebuiUrl?: string,
+): Promise<string[]> {
     const modelProvider =
         provider === 'openwebui' ? new OpenWebuiProvider(openwebuiUrl || OPENWEBUI_BASE_URL) : new OpenAIProvider();
     return modelProvider.listModels();

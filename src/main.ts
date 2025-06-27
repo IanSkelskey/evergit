@@ -62,7 +62,9 @@ export async function main(args = process.argv): Promise<void> {
                         console.log('Fetching available Open WebUI models...');
                         const models = await listModelsForProvider('openwebui', baseUrl);
                         if (models.length === 0) {
-                            console.error('No models found. Please ensure Open WebUI is running and has models installed.');
+                            console.error(
+                                'No models found. Please ensure Open WebUI is running and has models installed.',
+                            );
                             return;
                         }
                         const model = await selectModel(models, 'Select the default Open WebUI model:', 'llama3.2');
@@ -117,7 +119,11 @@ export async function main(args = process.argv): Promise<void> {
                         try {
                             const models = await listModelsForProvider('openwebui', baseUrl);
                             if (models.length > 0) {
-                                const model = await selectModel(models, 'Select the default Open WebUI model:', 'llama3.2');
+                                const model = await selectModel(
+                                    models,
+                                    'Select the default Open WebUI model:',
+                                    'llama3.2',
+                                );
                                 setConfig('openwebuiModel', model);
                             }
                         } catch (error) {
@@ -151,7 +157,9 @@ export async function main(args = process.argv): Promise<void> {
                         console.log('Fetching available Open WebUI models...');
                         const models = await listModelsForProvider('openwebui', baseUrl);
                         if (models.length === 0) {
-                            console.error('No models found. Please ensure Open WebUI is running and has models installed.');
+                            console.error(
+                                'No models found. Please ensure Open WebUI is running and has models installed.',
+                            );
                             return;
                         }
                         const model = await selectModel(models, 'Select the Open WebUI model:');

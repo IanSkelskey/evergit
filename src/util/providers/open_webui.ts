@@ -21,9 +21,11 @@ export class OpenWebuiProvider implements ModelProvider {
     async listModels(): Promise<string[]> {
         try {
             const response = await axios.get(`${this.baseUrl}/api/models`, {
-                headers: process.env.OPENWEBUI_API_KEY ? { Authorization: `Bearer ${process.env.OPENWEBUI_API_KEY}` } : {},
+                headers: process.env.OPENWEBUI_API_KEY
+                    ? { Authorization: `Bearer ${process.env.OPENWEBUI_API_KEY}` }
+                    : {},
             });
-            
+
             // Handle the response format where models are in a 'data' array
             const data = response.data as any;
             if (data.data && Array.isArray(data.data)) {
@@ -32,7 +34,7 @@ export class OpenWebuiProvider implements ModelProvider {
             // Handle the original expected format with 'models' array
             else if (data.models && Array.isArray(data.models)) {
                 return data.models.map((model: any) => model.name);
-            } 
+            }
             // If neither format is found, throw an error
             else {
                 console.error('Unexpected API response format:', data);
@@ -44,7 +46,8 @@ export class OpenWebuiProvider implements ModelProvider {
     }
 
     async createCompletion(systemPrompt: string, userPrompt: string, model: string): Promise<string | null> {
-        const endpoint = (this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl) + '/api/chat/completions';
+        const endpoint =
+            (this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl) + '/api/chat/completions';
         const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
         if (process.env.OPENWEBUI_API_KEY) {

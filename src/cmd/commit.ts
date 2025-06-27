@@ -86,7 +86,7 @@ async function generateAndProcessCommit(systemPrompt: string, userPrompt: string
         print('error', 'Failed to generate commit message.');
         return;
     }
-    
+
     let confirmed = await confirmCommitMessage(commitMessage);
     while (!confirmed) {
         const feedback = await requestFeedback();
@@ -106,7 +106,7 @@ async function generateAndProcessCommit(systemPrompt: string, userPrompt: string
             print('error', 'Failed to generate new commit message.');
             return;
         }
-        
+
         // Update the commit message with the new version
         confirmed = await confirmCommitMessage(newMessage);
         if (confirmed) {
@@ -116,7 +116,7 @@ async function generateAndProcessCommit(systemPrompt: string, userPrompt: string
             return;
         }
     }
-    
+
     // If we got here, the original message was confirmed
     commitWithMessage(commitMessage);
     print('success', 'Changes committed successfully.');
