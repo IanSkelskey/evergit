@@ -59,23 +59,13 @@ export class OpenWebuiProvider implements ModelProvider {
             ],
         };
 
-        console.debug('Open WebUI endpoint:', endpoint);
-        console.debug('Open WebUI model:', model);
-        console.debug('Request headers:', JSON.stringify(headers, null, 2));
-
         try {
             const response = await axios.post(endpoint, requestData, {
                 headers,
                 timeout: 300000, // Increase to 5 minutes for slow models
             });
 
-            // Log the full response structure for debugging
-            console.debug('Open WebUI response status:', response.status);
-            console.debug('Open WebUI response headers:', response.headers);
-            console.debug('Open WebUI response data type:', typeof response.data);
-
             if (typeof response.data === 'string') {
-                console.debug('Response is string, attempting to parse...');
                 try {
                     const parsedData = JSON.parse(response.data);
                     response.data = parsedData;
@@ -84,8 +74,6 @@ export class OpenWebuiProvider implements ModelProvider {
                     return (response.data as string).trim();
                 }
             }
-
-            console.debug('Open WebUI response structure:', JSON.stringify(response.data, null, 2));
 
             // Try multiple possible response structures
             const responseData = response.data as any;
@@ -119,8 +107,6 @@ export class OpenWebuiProvider implements ModelProvider {
             console.error('Unexpected response structure:', responseData);
             return null;
         } catch (error: any) {
-            console.error('Full error object:', error);
-
             if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
                 print(
                     'error',
